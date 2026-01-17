@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 interface Goal {
   id: string;
@@ -24,6 +24,7 @@ export default function HabitTracker() {
   const [showAddGoal, setShowAddGoal] = useState(false);
   const [newGoalName, setNewGoalName] = useState('');
   const [newGoalEmoji, setNewGoalEmoji] = useState('✅');
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Load data from localStorage on mount
   useEffect(() => {
@@ -85,6 +86,29 @@ export default function HabitTracker() {
     
     return { days, startingDayOfWeek, daysInMonth };
   };
+
+  useEffect(() => {
+    const today = new Date();
+    if (currentMonth.getMonth() === today.getMonth() && currentMonth.getFullYear() === today.getFullYear()) {
+      const { startingDayOfWeek } = getDaysInMonth(currentMonth);
+      const dayIndex = today.getDate();
+      const weekIndex = Math.floor((startingDayOfWeek + dayIndex - 1) / 7);
+      
+      if (scrollContainerRef.current) {
+        const weekHeader = document.getElementById(`week-header-${weekIndex}`);
+        if (weekHeader) {
+          const container = scrollContainerRef.current;
+          const headerRect = weekHeader.getBoundingClientRect();
+          const containerRect = container.getBoundingClientRect();
+          const scrollLeft = headerRect.left - containerRect.left + container.scrollLeft;
+
+          setTimeout(() => {
+            container.scrollTo({ left: scrollLeft, behavior: 'smooth' });
+          }, 100);
+        }
+      }
+    }
+  }, [currentMonth]);
 
   const formatDateKey = (date: Date): string => {
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
@@ -282,7 +306,7 @@ export default function HabitTracker() {
 
         {/* Main Content Grid */}
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto" ref={scrollContainerRef}>
             <div className="inline-block min-w-full">
               <table className="w-full border-collapse">
                 <thead>
@@ -291,7 +315,7 @@ export default function HabitTracker() {
                       My Goals
                     </th>
                     {weeks.map((week, weekIndex) => (
-                      <th key={weekIndex} colSpan={week.length} className="border border-gray-300 p-2 text-center bg-gray-50">
+                      <th key={weekIndex} id={`week-header-${weekIndex}`} colSpan={week.length} className="border border-gray-300 p-2 text-center bg-gray-50">
                         <div className="font-semibold text-gray-700">Week {weekIndex + 1}</div>
                         <div className="flex">
                           {week.map((day, dayIndex) => (
