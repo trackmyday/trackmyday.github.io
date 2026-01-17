@@ -243,44 +243,41 @@ export default function HabitTracker() {
   };
 
   return (
-    // <div className="min-h-screen bg-gray-50 p-4 md:p-8">
-    <div className="min-h-screen bg-gray-50 p-4 md:p-8 bg-gradient-to-br from-[#91ddcf] via-[#f7f9f2] to-[#e8c5e5]">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
+    <div className="max-w-7xl mx-auto p-4 md:p-8">
         <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))}
-              className="p-1 rounded-full hover:bg-gray-200 cursor-pointer"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-            <h1 className="text-3xl font-bold text-gray-800">{getMonthName(currentMonth)}</h1>
-            <button
-              onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))}
-              className="p-1 rounded-full hover:bg-gray-200 cursor-pointer"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-          </div>
-          <div className="flex flex-col md:flex-row gap-4 md:items-center">
-            <div className="text-sm text-gray-600">Number of goals: {goals.length}</div>
-            <div className="text-sm text-gray-600">Completed goals: {totalCompleted}</div>
             <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-600">Progress:</span>
-              <div className="w-32 h-4 bg-gray-200 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-green-500 transition-all duration-300"
-                  style={{ width: `${overallProgress}%` }}
-                />
-              </div>
-              <span className="text-sm font-semibold text-gray-700">{overallProgress}%</span>
+                <button
+                onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))}
+                className="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 cursor-pointer"
+                >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-600 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                </button>
+                <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-200">{getMonthName(currentMonth)}</h1>
+                <button
+                onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))}
+                className="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 cursor-pointer"
+                >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-600 dark:text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+                </button>
             </div>
-          </div>
+            <div className="flex flex-col md:flex-row gap-4 md:items-center">
+                <div className="text-sm text-gray-600 dark:text-gray-400">Number of goals: {goals.length}</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">Completed goals: {totalCompleted}</div>
+                <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Progress:</span>
+                    <div className="w-32 h-4 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                        <div 
+                        className="h-full bg-green-500 transition-all duration-300"
+                        style={{ width: `${overallProgress}%` }}
+                        />
+                    </div>
+                    <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">{overallProgress}%</span>
+                </div>
+            </div>
         </div>
 
         {/* Add Goal Button */}
@@ -300,13 +297,13 @@ export default function HabitTracker() {
                 value={newGoalName}
                 onChange={(e) => setNewGoalName(e.target.value)}
                 placeholder="Goal name"
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-transparent"
                 maxLength={50}
               />
               <select
                 value={newGoalEmoji}
                 onChange={(e) => setNewGoalEmoji(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-gray-50 dark:bg-slate-800"
               >
                 {EMOJI_OPTIONS.map(emoji => (
                   <option key={emoji} value={emoji}>{emoji}</option>
@@ -324,7 +321,7 @@ export default function HabitTracker() {
                   setShowAddGoal(false);
                   setNewGoalName('');
                 }}
-                className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
+                className="px-4 py-2 bg-gray-300 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-600 transition-colors"
               >
                 Cancel
               </button>
@@ -333,25 +330,25 @@ export default function HabitTracker() {
         </div>
 
         {/* Main Content Grid */}
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+        <div className="bg-white dark:bg-slate-800/50 rounded-lg shadow-lg overflow-hidden">
           <div className="overflow-x-auto" ref={scrollContainerRef}>
             <div className="inline-block min-w-full">
               <table className="w-full border-collapse">
                 <thead>
-                  <tr className="bg-gray-100">
-                    <th className="sticky left-0 z-10 bg-gray-100 border border-gray-300 p-3 text-left font-semibold text-gray-700 min-w-[200px]">
+                  <tr className="bg-gray-100 dark:bg-slate-900">
+                    <th className="sticky left-0 z-10 bg-gray-100 dark:bg-slate-900 border border-gray-300 dark:border-gray-700 p-3 text-left font-semibold text-gray-700 dark:text-gray-300 min-w-[200px]">
                       My Goals
                     </th>
                     {weeks.map((week, weekIndex) => (
-                      <th key={weekIndex} id={`week-header-${weekIndex}`} colSpan={week.length} className={`border border-gray-300 p-2 text-center ${isCurrentWeek(weekIndex) ? 'bg-indigo-100 font-bold' : 'bg-gray-50'}`}>
-                        <div className={`font-semibold ${isCurrentWeek(weekIndex) ? 'text-blue-700' : 'text-gray-700'}`}>Week {weekIndex + 1}</div>
+                      <th key={weekIndex} id={`week-header-${weekIndex}`} colSpan={week.length} className={`border border-gray-300 dark:border-gray-700 p-2 text-center ${isCurrentWeek(weekIndex) ? 'bg-indigo-100 dark:bg-indigo-900/50' : 'bg-gray-50 dark:bg-slate-800/50'}`}>
+                        <div className={`font-semibold ${isCurrentWeek(weekIndex) ? 'text-blue-700 dark:text-indigo-300' : 'text-gray-700 dark:text-gray-400'}`}>Week {weekIndex + 1}</div>
                         <div className="flex">
                           {week.map((day, dayIndex) => (
-                            <div key={dayIndex} className="flex-1 border-l border-gray-300 first:border-l-0 p-1">
+                            <div key={dayIndex} className="flex-1 border-l border-gray-300 dark:border-gray-700 first:border-l-0 p-1">
                               {day ? (
                                 <>
-                                  <div className="text-xs text-gray-600">{getDayLabel(day)}</div>
-                                  <div className="text-sm font-semibold text-gray-800">{day.getDate()}</div>
+                                  <div className="text-xs text-gray-600 dark:text-gray-400">{getDayLabel(day)}</div>
+                                  <div className="text-sm font-semibold text-gray-800 dark:text-gray-200">{day.getDate()}</div>
                                 </>
                               ) : null}
                             </div>
@@ -363,15 +360,15 @@ export default function HabitTracker() {
                 </thead>
                 <tbody>
                   {goals.map((goal) => (
-                    <tr key={goal.id} className="hover:bg-gray-50">
-                      <td className="sticky left-0 z-10 bg-white border border-gray-300 p-3">
+                    <tr key={goal.id} className="hover:bg-gray-50 dark:hover:bg-slate-800">
+                      <td className="sticky left-0 z-10 bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-700 p-3">
                         <div className="flex items-center justify-between">
-                          <span className="text-base">
+                          <span className="text-base dark:text-gray-200">
                             {goal.emoji} {goal.name}
                           </span>
                           <button
                             onClick={() => removeGoal(goal.id)}
-                            className="ml-2 text-red-500 hover:text-red-700 text-sm"
+                            className="ml-2 text-red-500 hover:text-red-700 text-xl cursor-pointer"
                             title="Remove goal"
                           >
                             ×
@@ -383,7 +380,7 @@ export default function HabitTracker() {
                           {week.map((day, dayIndex) => (
                             <td
                               key={dayIndex}
-                              className={`border border-gray-300 p-2 text-center ${isCurrentWeek(weekIndex) ? 'bg-indigo-50' : ''}`}
+                              className={`border border-gray-300 dark:border-gray-700 p-2 text-center ${isCurrentWeek(weekIndex) ? 'bg-indigo-50 dark:bg-indigo-900/30' : 'dark:bg-slate-800/50'}`}
                             >
                               {day ? (
                                 <button
@@ -391,7 +388,7 @@ export default function HabitTracker() {
                                   className={`w-8 h-8 border-2 rounded transition-all ${
                                     isCompleted(goal.id, day)
                                       ? 'bg-green-500 border-green-600 text-white'
-                                      : 'bg-white border-gray-300 hover:border-indigo-500 hover:bg-indigo-50'
+                                      : 'bg-white dark:bg-slate-700 border-gray-300 dark:border-gray-600 hover:border-indigo-500 dark:hover:border-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30'
                                   }`}
                                 >
                                   {isCompleted(goal.id, day) ? '✓' : ''}
@@ -410,48 +407,48 @@ export default function HabitTracker() {
         </div>
 
         {/* Progress Summary Table */}
-        <div className="mt-6 bg-white rounded-lg shadow-lg overflow-hidden">
+        <div className="mt-6 bg-white dark:bg-slate-800/50 rounded-lg shadow-lg overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full border-collapse">
               <thead>
-                <tr className="bg-gray-100">
-                  <th className="border border-gray-300 p-2 text-left font-semibold text-gray-700">Progress</th>
+                <tr className="bg-gray-100 dark:bg-slate-900">
+                  <th className="border border-gray-300 dark:border-gray-700 p-2 text-left font-semibold text-gray-700 dark:text-gray-300">Progress</th>
                   {allDays.map((day) => (
-                    <th key={formatDateKey(day)} className="border border-gray-300 p-2 text-center text-sm font-semibold text-gray-700">
+                    <th key={formatDateKey(day)} className="border border-gray-300 dark:border-gray-700 p-2 text-center text-sm font-semibold text-gray-700 dark:text-gray-300">
                       {day.getDate()}
                     </th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td className="border border-gray-300 p-2 font-semibold text-gray-700">Progress</td>
+                <tr className="dark:bg-slate-800/50">
+                  <td className="border border-gray-300 dark:border-gray-700 p-2 font-semibold text-gray-700 dark:text-gray-300">Progress</td>
                   {allDays.map((day) => {
                     const { progress } = getProgressForDay(day);
                     return (
-                      <td key={formatDateKey(day)} className="border border-gray-300 p-2 text-center text-sm">
+                      <td key={formatDateKey(day)} className="border border-gray-300 dark:border-gray-700 p-2 text-center text-sm dark:text-gray-400">
                         {progress}%
                       </td>
                     );
                   })}
                 </tr>
-                <tr>
-                  <td className="border border-gray-300 p-2 font-semibold text-gray-700">Done</td>
+                <tr className="bg-gray-50 dark:bg-slate-800">
+                  <td className="border border-gray-300 dark:border-gray-700 p-2 font-semibold text-gray-700 dark:text-gray-300">Done</td>
                   {allDays.map((day) => {
                     const { done } = getProgressForDay(day);
                     return (
-                      <td key={formatDateKey(day)} className="border border-gray-300 p-2 text-center text-sm">
+                      <td key={formatDateKey(day)} className="border border-gray-300 dark:border-gray-700 p-2 text-center text-sm dark:text-gray-400">
                         {done}
                       </td>
                     );
                   })}
                 </tr>
-                <tr>
-                  <td className="border border-gray-300 p-2 font-semibold text-gray-700">Not Done</td>
+                <tr className="dark:bg-slate-800/50">
+                  <td className="border border-gray-300 dark:border-gray-700 p-2 font-semibold text-gray-700 dark:text-gray-300">Not Done</td>
                   {allDays.map((day) => {
                     const { notDone } = getProgressForDay(day);
                     return (
-                      <td key={formatDateKey(day)} className="border border-gray-300 p-2 text-center text-sm">
+                      <td key={formatDateKey(day)} className="border border-gray-300 dark:border-gray-700 p-2 text-center text-sm dark:text-gray-400">
                         {notDone}
                       </td>
                     );
@@ -463,8 +460,8 @@ export default function HabitTracker() {
         </div>
 
         {/* Progress Graph */}
-        <div className="mt-6 bg-white rounded-lg shadow-lg p-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">Progress Graph</h2>
+        <div className="mt-6 bg-white dark:bg-slate-800/50 rounded-lg shadow-lg p-6">
+          <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Progress Graph</h2>
           <div className="h-48 flex items-end gap-1">
             {allDays.map((day) => {
               const { progress } = getProgressForDay(day);
@@ -477,12 +474,12 @@ export default function HabitTracker() {
                       title={`Day ${day.getDate()}: ${progress}%`}
                     />
                   </div>
-                  <div className="text-xs text-gray-600 mt-1">{day.getDate()}</div>
+                  <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">{day.getDate()}</div>
                 </div>
               );
             })}
           </div>
-          <div className="flex justify-between mt-2 text-xs text-gray-500">
+          <div className="flex justify-between mt-2 text-xs text-gray-500 dark:text-gray-400">
             <span>0%</span>
             <span>25%</span>
             <span>50%</span>
@@ -495,7 +492,7 @@ export default function HabitTracker() {
         <div className="mt-6 flex justify-center gap-4">
           <button
             onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))}
-            className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+            className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
           >
             ← Previous Month
           </button>
@@ -507,19 +504,11 @@ export default function HabitTracker() {
           </button>
           <button
             onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))}
-            className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+            className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
           >
             Next Month →
           </button>
         </div>
-        <footer className="container mx-auto px-4 py-8 mt-16 border-t border-gray-200">
-        <div className="text-center text-gray-600">
-          <Link href="/" className="text-gray-700 hover:text-indigo-600 transition-colors font-bold">
-            Back to Home
-          </Link>
-        </div>
-      </footer>
       </div>
-    </div>
   );
 }
