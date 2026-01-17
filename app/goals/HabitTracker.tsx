@@ -208,7 +208,8 @@ export default function HabitTracker() {
   const overallProgress = getOverallProgress();
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+    // <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-500 via-pink-500 to-rose-400">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">

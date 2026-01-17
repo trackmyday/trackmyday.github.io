@@ -143,13 +143,6 @@ export default function Home() {
           </div>
         </div>
       </main>
-
-      {/* Footer */}
-      <footer className="container mx-auto px-4 py-8 mt-16 border-t border-gray-200">
-        <div className="text-center text-gray-600">
-          <p>Built with Next.js and Tailwind CSS</p>
-        </div>
-      </footer>
     </div>
   );
 }
