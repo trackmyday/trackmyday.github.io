@@ -18,7 +18,7 @@ interface RouteCard {
 const routes: RouteCard[] = [
   {
     title: "Goals & Habits",
-    description: "Track your daily habits and build consistency with our monthly habit tracker",
+    description: "Track your daily goals and build consistency with our monthly goals tracker",
     href: "/goals",
     emoji: "🎯",
     gradient: "from-indigo-600 via-purple-600 to-pink-500",

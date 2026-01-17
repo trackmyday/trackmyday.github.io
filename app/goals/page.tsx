@@ -3,7 +3,7 @@ import HabitTracker from "./HabitTracker";
 
 export const metadata: Metadata = {
   title: "Goals | Track My Day",
-  description: "Daily Habit Tracker",
+  description: "Daily Goals Tracker",
 };
 
 export default function Goals() {

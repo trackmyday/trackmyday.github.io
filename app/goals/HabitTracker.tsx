@@ -2,14 +2,14 @@
 
 import React, { useState, useEffect } from 'react';
 
-interface Habit {
+interface Goal {
   id: string;
   name: string;
   emoji: string;
 }
 
 interface CompletionData {
-  [habitId: string]: {
+  [goalId: string]: {
     [date: string]: boolean;
   };
 }
@@ -17,31 +17,39 @@ interface CompletionData {
 const EMOJI_OPTIONS = ['🛁', '🧘', '🍳', '💪', '💻', '📖', '💰', '🎯', '🚫', '📵', '✍️', '🚿', '⏰', '🗓️', '🌿'];
 
 export default function HabitTracker() {
-  const [habits, setHabits] = useState<Habit[]>([]);
+  const [goals, setGoals] = useState<Goal[]>([]);
   const [completions, setCompletions] = useState<CompletionData>({});
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [showAddHabit, setShowAddHabit] = useState(false);
-  const [newHabitName, setNewHabitName] = useState('');
-  const [newHabitEmoji, setNewHabitEmoji] = useState('✅');
+  const [showAddGoal, setShowAddGoal] = useState(false);
+  const [newGoalName, setNewGoalName] = useState('');
+  const [newGoalEmoji, setNewGoalEmoji] = useState('✅');
 
   // Load data from localStorage on mount
   useEffect(() => {
+    // Check for old 'habits' key and migrate if exists
     const savedHabits = localStorage.getItem('habits');
+    const savedGoals = localStorage.getItem('goals');
     const savedCompletions = localStorage.getItem('completions');
     
-    if (savedHabits) {
-      setHabits(JSON.parse(savedHabits));
+    if (savedGoals) {
+      setGoals(JSON.parse(savedGoals));
+    } else if (savedHabits) {
+      // Migrate from old 'habits' key
+      const migratedGoals = JSON.parse(savedHabits);
+      setGoals(migratedGoals);
+      localStorage.setItem('goals', JSON.stringify(migratedGoals));
+      localStorage.removeItem('habits');
     } else {
-      // Initialize with sample habits
-      const sampleHabits: Habit[] = [
+      // Initialize with sample goals
+      const sampleGoals: Goal[] = [
         { id: '1', name: 'Bath', emoji: '🛁' },
         { id: '2', name: 'Meditation', emoji: '🧘' },
         { id: '3', name: 'Breakfast', emoji: '🍳' },
         { id: '4', name: 'Workout', emoji: '💪' },
         { id: '5', name: 'Coding', emoji: '💻' },
       ];
-      setHabits(sampleHabits);
-      localStorage.setItem('habits', JSON.stringify(sampleHabits));
+      setGoals(sampleGoals);
+      localStorage.setItem('goals', JSON.stringify(sampleGoals));
     }
     
     if (savedCompletions) {
@@ -49,12 +57,12 @@ export default function HabitTracker() {
     }
   }, []);
 
-  // Save habits to localStorage whenever they change
+  // Save goals to localStorage whenever they change
   useEffect(() => {
-    if (habits.length > 0) {
-      localStorage.setItem('habits', JSON.stringify(habits));
+    if (goals.length > 0) {
+      localStorage.setItem('goals', JSON.stringify(goals));
     }
-  }, [habits]);
+  }, [goals]);
 
   // Save completions to localStorage whenever they change
   useEffect(() => {
@@ -81,40 +89,40 @@ export default function HabitTracker() {
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
   };
 
-  const toggleCompletion = (habitId: string, date: Date) => {
+  const toggleCompletion = (goalId: string, date: Date) => {
     const dateKey = formatDateKey(date);
     setCompletions(prev => ({
       ...prev,
-      [habitId]: {
-        ...prev[habitId],
-        [dateKey]: !prev[habitId]?.[dateKey],
+      [goalId]: {
+        ...prev[goalId],
+        [dateKey]: !prev[goalId]?.[dateKey],
       },
     }));
   };
 
-  const isCompleted = (habitId: string, date: Date): boolean => {
+  const isCompleted = (goalId: string, date: Date): boolean => {
     const dateKey = formatDateKey(date);
-    return completions[habitId]?.[dateKey] || false;
+    return completions[goalId]?.[dateKey] || false;
   };
 
-  const addHabit = () => {
-    if (newHabitName.trim() && habits.length < 50) {
-      const newHabit: Habit = {
+  const addGoal = () => {
+    if (newGoalName.trim() && goals.length < 50) {
+      const newGoal: Goal = {
         id: Date.now().toString(),
-        name: newHabitName.trim(),
-        emoji: newHabitEmoji,
+        name: newGoalName.trim(),
+        emoji: newGoalEmoji,
       };
-      setHabits([...habits, newHabit]);
-      setNewHabitName('');
-      setNewHabitEmoji('✅');
-      setShowAddHabit(false);
+      setGoals([...goals, newGoal]);
+      setNewGoalName('');
+      setNewGoalEmoji('✅');
+      setShowAddGoal(false);
     }
   };
 
-  const removeHabit = (habitId: string) => {
-    setHabits(habits.filter(h => h.id !== habitId));
+  const removeGoal = (goalId: string) => {
+    setGoals(goals.filter(g => g.id !== goalId));
     const newCompletions = { ...completions };
-    delete newCompletions[habitId];
+    delete newCompletions[goalId];
     setCompletions(newCompletions);
   };
 
@@ -160,8 +168,8 @@ export default function HabitTracker() {
   const getProgressForDay = (date: Date | null): { progress: number; done: number; notDone: number } => {
     if (!date) return { progress: 0, done: 0, notDone: 0 };
     
-    const completed = habits.filter(habit => isCompleted(habit.id, date)).length;
-    const total = habits.length;
+    const completed = goals.filter(goal => isCompleted(goal.id, date)).length;
+    const total = goals.length;
     const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
     
     return {
@@ -177,18 +185,18 @@ export default function HabitTracker() {
   };
 
   const getTotalCompleted = (): number => {
-    return Object.values(completions).reduce((total, habitCompletions) => {
-      return total + Object.values(habitCompletions).filter(Boolean).length;
+    return Object.values(completions).reduce((total, goalCompletions) => {
+      return total + Object.values(goalCompletions).filter(Boolean).length;
     }, 0);
   };
 
   const getOverallProgress = (): number => {
     const allDays = getAllDaysInMonth();
-    const totalPossible = habits.length * allDays.length;
+    const totalPossible = goals.length * allDays.length;
     if (totalPossible === 0) return 0;
     
     const totalCompleted = allDays.reduce((sum, day) => {
-      return sum + habits.filter(habit => isCompleted(habit.id, day)).length;
+      return sum + goals.filter(goal => isCompleted(goal.id, day)).length;
     }, 0);
     
     return Math.round((totalCompleted / totalPossible) * 100);
@@ -206,8 +214,8 @@ export default function HabitTracker() {
         <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <h1 className="text-3xl font-bold text-gray-800">{getMonthName(currentMonth)}</h1>
           <div className="flex flex-col md:flex-row gap-4 md:items-center">
-            <div className="text-sm text-gray-600">Number of habits: {habits.length}</div>
-            <div className="text-sm text-gray-600">Completed habits: {totalCompleted}</div>
+            <div className="text-sm text-gray-600">Number of goals: {goals.length}</div>
+            <div className="text-sm text-gray-600">Completed goals: {totalCompleted}</div>
             <div className="flex items-center gap-2">
               <span className="text-sm text-gray-600">Progress:</span>
               <div className="w-32 h-4 bg-gray-200 rounded-full overflow-hidden">
@@ -221,29 +229,29 @@ export default function HabitTracker() {
           </div>
         </div>
 
-        {/* Add Habit Button */}
+        {/* Add Goal Button */}
         <div className="mb-4">
-          {!showAddHabit ? (
+          {!showAddGoal ? (
             <button
-              onClick={() => setShowAddHabit(true)}
-              disabled={habits.length >= 50}
+              onClick={() => setShowAddGoal(true)}
+              disabled={goals.length >= 50}
               className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
             >
-              + Add Habit {habits.length >= 50 && '(Max 50)'}
+              + Add Goal {goals.length >= 50 && '(Max 50)'}
             </button>
           ) : (
             <div className="flex gap-2 items-center flex-wrap">
               <input
                 type="text"
-                value={newHabitName}
-                onChange={(e) => setNewHabitName(e.target.value)}
-                placeholder="Habit name"
+                value={newGoalName}
+                onChange={(e) => setNewGoalName(e.target.value)}
+                placeholder="Goal name"
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 maxLength={50}
               />
               <select
-                value={newHabitEmoji}
-                onChange={(e) => setNewHabitEmoji(e.target.value)}
+                value={newGoalEmoji}
+                onChange={(e) => setNewGoalEmoji(e.target.value)}
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
               >
                 {EMOJI_OPTIONS.map(emoji => (
@@ -251,16 +259,16 @@ export default function HabitTracker() {
                 ))}
               </select>
               <button
-                onClick={addHabit}
-                disabled={!newHabitName.trim() || habits.length >= 50}
+                onClick={addGoal}
+                disabled={!newGoalName.trim() || goals.length >= 50}
                 className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
               >
                 Add
               </button>
               <button
                 onClick={() => {
-                  setShowAddHabit(false);
-                  setNewHabitName('');
+                  setShowAddGoal(false);
+                  setNewGoalName('');
                 }}
                 className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
               >
@@ -278,7 +286,7 @@ export default function HabitTracker() {
                 <thead>
                   <tr className="bg-gray-100">
                     <th className="sticky left-0 z-10 bg-gray-100 border border-gray-300 p-3 text-left font-semibold text-gray-700 min-w-[200px]">
-                      My Habits
+                      My Goals
                     </th>
                     {weeks.map((week, weekIndex) => (
                       <th key={weekIndex} colSpan={week.length} className="border border-gray-300 p-2 text-center bg-gray-50">
@@ -300,17 +308,17 @@ export default function HabitTracker() {
                   </tr>
                 </thead>
                 <tbody>
-                  {habits.map((habit) => (
-                    <tr key={habit.id} className="hover:bg-gray-50">
+                  {goals.map((goal) => (
+                    <tr key={goal.id} className="hover:bg-gray-50">
                       <td className="sticky left-0 z-10 bg-white border border-gray-300 p-3">
                         <div className="flex items-center justify-between">
                           <span className="text-base">
-                            {habit.emoji} {habit.name}
+                            {goal.emoji} {goal.name}
                           </span>
                           <button
-                            onClick={() => removeHabit(habit.id)}
+                            onClick={() => removeGoal(goal.id)}
                             className="ml-2 text-red-500 hover:text-red-700 text-sm"
-                            title="Remove habit"
+                            title="Remove goal"
                           >
                             ×
                           </button>
@@ -325,14 +333,14 @@ export default function HabitTracker() {
                             >
                               {day ? (
                                 <button
-                                  onClick={() => toggleCompletion(habit.id, day)}
+                                  onClick={() => toggleCompletion(goal.id, day)}
                                   className={`w-8 h-8 border-2 rounded transition-all ${
-                                    isCompleted(habit.id, day)
+                                    isCompleted(goal.id, day)
                                       ? 'bg-green-500 border-green-600 text-white'
                                       : 'bg-white border-gray-300 hover:border-indigo-500 hover:bg-indigo-50'
                                   }`}
                                 >
-                                  {isCompleted(habit.id, day) ? '✓' : ''}
+                                  {isCompleted(goal.id, day) ? '✓' : ''}
                                 </button>
                               ) : null}
                             </td>
