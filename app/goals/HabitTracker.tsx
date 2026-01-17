@@ -104,7 +104,7 @@ export default function HabitTracker() {
 
           setTimeout(() => {
             container.scrollTo({ left: scrollLeft, behavior: 'smooth' });
-          }, 100);
+          }, 100);  
         }
       }
     }
@@ -238,7 +238,25 @@ export default function HabitTracker() {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <h1 className="text-3xl font-bold text-gray-800">{getMonthName(currentMonth)}</h1>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))}
+              className="p-1 rounded-full hover:bg-gray-200 cursor-pointer"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <h1 className="text-3xl font-bold text-gray-800">{getMonthName(currentMonth)}</h1>
+            <button
+              onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))}
+              className="p-1 rounded-full hover:bg-gray-200 cursor-pointer"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
           <div className="flex flex-col md:flex-row gap-4 md:items-center">
             <div className="text-sm text-gray-600">Number of goals: {goals.length}</div>
             <div className="text-sm text-gray-600">Completed goals: {totalCompleted}</div>
