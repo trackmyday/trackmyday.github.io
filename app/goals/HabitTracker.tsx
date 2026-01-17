@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import React, { useState, useEffect } from 'react';
 
 interface Goal {
@@ -209,7 +210,7 @@ export default function HabitTracker() {
 
   return (
     // <div className="min-h-screen bg-gray-50 p-4 md:p-8">
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-500 via-pink-500 to-rose-400">
+    <div className="min-h-screen bg-gray-50 p-4 md:p-8 bg-gradient-to-br from-[#91ddcf] via-[#f7f9f2] to-[#e8c5e5]">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -459,6 +460,13 @@ export default function HabitTracker() {
             Next Month →
           </button>
         </div>
+        <footer className="container mx-auto px-4 py-8 mt-16 border-t border-gray-200">
+        <div className="text-center text-gray-600">
+          <Link href="/" className="text-gray-700 hover:text-indigo-600 transition-colors font-bold">
+            Back to Home
+          </Link>
+        </div>
+      </footer>
       </div>
     </div>
   );

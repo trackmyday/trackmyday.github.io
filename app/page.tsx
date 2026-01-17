@@ -27,7 +27,7 @@ const routes: RouteCard[] = [
   {
     title: "Start Your Day",
     description: "Plan and organize your daily tasks and activities",
-    href: "/start",
+    href: "https://startmyday.github.io/manage",
     emoji: "🌅",
     gradient: "from-purple-500 via-pink-500 to-rose-400",
     status: "available",
@@ -135,7 +135,7 @@ export default function Home() {
             </div>
             <div className="text-center">
               <div className="text-4xl mb-4">🎨</div>
-              <h4 className="text-xl font-semibold text-gray-900 mb-2">Beautiful Design</h4>
+              <h4 className="text-xl font-semibold text-gray-900 mb-2">Minimal Design</h4>
               <p className="text-gray-600">
                 Enjoy a clean, modern interface that's easy to use
               </p>
@@ -143,6 +143,13 @@ export default function Home() {
           </div>
         </div>
       </main>
+
+      {/* Footer */}
+      <footer className="container mx-auto px-4 py-8 mt-16 border-t border-gray-200">
+        <div className="text-center text-gray-600">
+          <p>© Track My Day</p>
+        </div>
+      </footer>
     </div>
   );
 }
