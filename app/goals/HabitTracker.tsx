@@ -232,6 +232,16 @@ export default function HabitTracker() {
   const totalCompleted = getTotalCompleted();
   const overallProgress = getOverallProgress();
 
+  const isCurrentWeek = (weekIndex: number) => {
+    const today = new Date();
+    if (currentMonth.getMonth() !== today.getMonth() || currentMonth.getFullYear() !== today.getFullYear()) {
+      return false;
+    }
+    const { startingDayOfWeek } = getDaysInMonth(currentMonth);
+    const currentWeekIndex = Math.floor((startingDayOfWeek + today.getDate() - 1) / 7);
+    return weekIndex === currentWeekIndex;
+  };
+
   return (
     // <div className="min-h-screen bg-gray-50 p-4 md:p-8">
     <div className="min-h-screen bg-gray-50 p-4 md:p-8 bg-gradient-to-br from-[#91ddcf] via-[#f7f9f2] to-[#e8c5e5]">
@@ -333,8 +343,8 @@ export default function HabitTracker() {
                       My Goals
                     </th>
                     {weeks.map((week, weekIndex) => (
-                      <th key={weekIndex} id={`week-header-${weekIndex}`} colSpan={week.length} className="border border-gray-300 p-2 text-center bg-gray-50">
-                        <div className="font-semibold text-gray-700">Week {weekIndex + 1}</div>
+                      <th key={weekIndex} id={`week-header-${weekIndex}`} colSpan={week.length} className={`border border-gray-300 p-2 text-center ${isCurrentWeek(weekIndex) ? 'bg-indigo-100 font-bold' : 'bg-gray-50'}`}>
+                        <div className={`font-semibold ${isCurrentWeek(weekIndex) ? 'text-blue-700' : 'text-gray-700'}`}>Week {weekIndex + 1}</div>
                         <div className="flex">
                           {week.map((day, dayIndex) => (
                             <div key={dayIndex} className="flex-1 border-l border-gray-300 first:border-l-0 p-1">
@@ -373,7 +383,7 @@ export default function HabitTracker() {
                           {week.map((day, dayIndex) => (
                             <td
                               key={dayIndex}
-                              className="border border-gray-300 p-2 text-center"
+                              className={`border border-gray-300 p-2 text-center ${isCurrentWeek(weekIndex) ? 'bg-indigo-50' : ''}`}
                             >
                               {day ? (
                                 <button
