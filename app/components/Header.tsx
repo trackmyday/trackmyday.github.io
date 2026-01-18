@@ -15,6 +15,7 @@ export const Header = () => {
           <nav className="flex items-center gap-4">
             <Link href="/goals" className="text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-cyan-400">Goals</Link>
             <Link href="/whiteboard" className="text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-cyan-400">Whiteboard</Link>
+            <Link href="/tetris" className="text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-cyan-400">Tetris</Link>
           </nav>
           {/* <ThemeToggle /> */}
         </div>
