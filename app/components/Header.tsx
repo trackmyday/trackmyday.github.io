@@ -1,6 +1,6 @@
 'use client'
 import Link from 'next/link';
-import { ThemeToggle } from './ThemeToggle';
+// import { ThemeToggle } from './ThemeToggle';
 
 export const Header = () => {
   return (
@@ -11,7 +11,7 @@ export const Header = () => {
             Track My Day
           </h1>
         </Link>
-        <ThemeToggle />
+        {/* <ThemeToggle /> */}
       </div>
     </header>
   );
