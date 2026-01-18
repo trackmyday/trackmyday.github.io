@@ -291,7 +291,7 @@ const LaneRashGame: React.FC = () => {
           <p>Final Score: {score}</p>
           <button
             onClick={restartGame}
-            className="mt-4 px-6 py-2 bg-green-500 rounded text-xl"
+            className="mt-4 px-6 py-2 bg-green-500 rounded text-xl cursor-pointer"
           >
             Restart
           </button>
