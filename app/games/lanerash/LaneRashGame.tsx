@@ -126,20 +126,71 @@ const LaneRashGame: React.FC = () => {
         width: TRACK_WIDTH,
         height: '600px',
         border: '5px solid black',
-        backgroundColor: '#222', // Solid dark road color
-        backgroundImage: `repeating-linear-gradient(
-          to bottom,
-          transparent 0px,
-          transparent 70px,
-          rgba(255, 255, 255, 0.145) 70px,
-          #8f8f8f 100px
-        )`, // White dashed lines for lanes
-        backgroundSize: `100% 100px`, // Vertical repeat every 100px
-        backgroundPosition: `center top`, // Animate background-position-y
-        animation: 'roadScroll 2s linear infinite' // Add animation for scrolling road
+        backgroundColor: '#222', // Slightly lighter base for texture
+        // Multi-layered road effect with varied line styles and speeds
+        backgroundImage: `
+          linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 50%, rgba(0,0,0,0.3) 100%), /* Subtle road texture */
+          linear-gradient(to right, rgba(0,0,0,0.2) 1px, transparent 1px), /* Fine vertical lines */
+          linear-gradient(to bottom, transparent 0%, transparent 40%, rgba(255,255,255,0.1) 40%, rgba(255,255,255,0.1) 42%, transparent 42%, transparent 100%),
+          repeating-linear-gradient(
+            to bottom,
+            #333 0px,
+            #333 90px,
+            #555 90px,
+            #555 100px
+          ),
+          repeating-linear-gradient(
+            to bottom,
+            white 0px,
+            white 50px,
+            transparent 50px,
+            transparent 100px
+          )
+        `,
+        backgroundSize: `100% 600px, 100% 100px, 100% 100px`, // Sizes for each layer
+        backgroundPosition: `center top, center top, center top`,
+        animation: `roadScroll 1s linear infinite, backgroundScroll 1s linear infinite`, // Multiple animations
       }}
     >
-      <div className="absolute top-2 left-2 text-white text-lg">Score: {score}</div>
+            <style>{`
+              @keyframes roadScroll {
+                from { background-position-y: 0px, 0px, 0px; }
+                to { background-position-y: 600px, 600px, 600px; }
+              }
+              @keyframes backgroundScroll {
+                from { background-position-y: 0px; }
+                to { background-position-y: 600px; }
+              }
+                      @keyframes sideScroll {
+                        from { background-position-y: 0px; }
+                        to { background-position-y: 600px; } /* Aligned with roadScroll distance */
+                      }            `}</style>
+            
+            {/* Left Barrier */}
+            <div 
+              className="absolute left-0 top-0 h-full w-10 bg-gray-700" 
+              style={{
+                borderRight: '2px solid #555',
+                backgroundImage: `repeating-linear-gradient(to bottom, #888 0px, #888 10px, transparent 10px, transparent 20px)`,
+                backgroundSize: '100% 120px',
+                animation: 'sideScroll 1s linear infinite', // Faster scroll for closer elements
+                zIndex: 0,
+              }}
+            ></div>
+      
+            {/* Right Barrier */}
+            <div 
+              className="absolute right-0 top-0 h-full w-10 bg-gray-700" 
+              style={{
+                borderLeft: '2px solid #555',
+                backgroundImage: `repeating-linear-gradient(to bottom, #888 0px, #888 10px, transparent 10px, transparent 20px)`,
+                backgroundSize: '100% 120px',
+                animation: 'sideScroll 1s linear infinite', // Faster scroll for closer elements
+                zIndex: 0,
+              }}
+            ></div>
+      
+            <div className="absolute top-2 left-2 text-white text-lg">Score: {score}</div>
       <button
         onClick={togglePause}
         className="absolute top-2 right-2 px-4 py-2 bg-gray-600 text-white rounded z-30"
@@ -161,10 +212,37 @@ const LaneRashGame: React.FC = () => {
             height: BIKE_HEIGHT,
             left: playerBike.x,
             top: playerBike.y,
-            borderRadius: '50% 50% 10% 10% / 60% 60% 10% 10%', // More bike-like shape
-            boxShadow: '0 0 10px rgba(0,0,255,0.7)',
+            borderRadius: '15px 15px 5px 5px / 30px 30px 5px 5px', // More defined bike shape
+            boxShadow: 'inset 0 -5px 10px rgba(0,0,0,0.3), 0 0 15px rgba(0,0,255,0.7)', // Inner shadow and outer glow
+            border: '2px solid #33f', // Blue border
+            position: 'absolute',
+            zIndex: 1,
           }}
-        ></div>
+        >
+          {/* Headlight */}
+          <div style={{
+            position: 'absolute',
+            top: '5px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '8px',
+            height: '4px',
+            backgroundColor: 'yellow',
+            borderRadius: '2px',
+            boxShadow: '0 0 5px yellow',
+          }}></div>
+          {/* Seat/Rear */}
+          <div style={{
+            position: 'absolute',
+            bottom: '5px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '20px',
+            height: '8px',
+            backgroundColor: '#333',
+            borderRadius: '4px 4px 2px 2px',
+          }}></div>
+        </div>
       )}
       {enemyBikes.map(bike => (
         <div
@@ -175,10 +253,37 @@ const LaneRashGame: React.FC = () => {
             height: BIKE_HEIGHT,
             left: bike.x,
             top: bike.y,
-            borderRadius: '50% 50% 10% 10% / 60% 60% 10% 10%', // Similar bike shape
-            boxShadow: '0 0 8px rgba(255,0,0,0.6)', // Red shadow
+            borderRadius: '15px 15px 5px 5px / 30px 30px 5px 5px', // More defined bike shape
+            boxShadow: 'inset 0 -5px 10px rgba(0,0,0,0.3), 0 0 12px rgba(255,0,0,0.6)', // Inner shadow and red glow
+            border: '2px solid #f33', // Red border
+            position: 'absolute',
+            zIndex: 1,
           }}
-        ></div>
+        >
+          {/* Headlight */}
+          <div style={{
+            position: 'absolute',
+            top: '5px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '8px',
+            height: '4px',
+            backgroundColor: 'orange',
+            borderRadius: '2px',
+            boxShadow: '0 0 5px orange',
+          }}></div>
+          {/* Seat/Rear */}
+          <div style={{
+            position: 'absolute',
+            bottom: '5px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '20px',
+            height: '8px',
+            backgroundColor: '#444',
+            borderRadius: '4px 4px 2px 2px',
+          }}></div>
+        </div>
       ))}
       {gameOver && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-75 text-white text-3xl">
