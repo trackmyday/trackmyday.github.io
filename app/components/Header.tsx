@@ -1,6 +1,5 @@
-'use client'
+'use client';
 import Link from 'next/link';
-// import { ThemeToggle } from './ThemeToggle';
 
 export const Header = () => {
   return (
@@ -13,11 +12,20 @@ export const Header = () => {
         </Link>
         <div className="flex items-center gap-4">
           <nav className="flex items-center gap-4">
-            <Link href="/goals" className="text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-cyan-400">Goals</Link>
-            <Link href="/whiteboard" className="text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-cyan-400">Whiteboard</Link>
-            <Link href="/tetris" className="text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-cyan-400">Tetris</Link>
+            <div className="relative group">
+              <span className="text-slate-600 dark:text-slate-300 cursor-pointer">Utils</span>
+              <div className="absolute hidden group-hover:block bg-white dark:bg-slate-800 shadow-lg rounded-md mt-2 py-2 w-48">
+                <Link href="/utils/goals" className="block px-4 py-2 text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-cyan-400">Goals</Link>
+                <Link href="/utils/whiteboard" className="block px-4 py-2 text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-cyan-400">Whiteboard</Link>
+              </div>
+            </div>
+            <div className="relative group">
+              <span className="text-slate-600 dark:text-slate-300 cursor-pointer">Games</span>
+              <div className="absolute hidden group-hover:block bg-white dark:bg-slate-800 shadow-lg rounded-md mt-2 py-2 w-48">
+                <Link href="/games/tetris" className="block px-4 py-2 text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-cyan-400">Tetris</Link>
+              </div>
+            </div>
           </nav>
-          {/* <ThemeToggle /> */}
         </div>
       </div>
     </header>
