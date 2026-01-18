@@ -44,11 +44,17 @@ export default function HabitTracker() {
     } else {
       // Initialize with sample goals
       const sampleGoals: Goal[] = [
-        { id: '1', name: 'Bath', emoji: '🛁' },
-        { id: '2', name: 'Meditation', emoji: '🧘' },
-        { id: '3', name: 'Breakfast', emoji: '🍳' },
-        { id: '4', name: 'Workout', emoji: '💪' },
-        { id: '5', name: 'Coding', emoji: '💻' },
+        { id: '7', name: 'Shower', emoji: '🚿' },
+        { id: '1', name: 'Meditate', emoji: '🧘' },
+        { id: '3', name: 'Workout', emoji: '💪' },
+        { id: '2', name: 'Breakfast', emoji: '🍳' },
+        { id: '4', name: 'Work', emoji: '💻' },
+        { id: '5', name: 'Read', emoji: '📖' },
+        { id: '6', name: 'Sleep', emoji: '🛌' },
+        { id: '14', name: 'Organize', emoji: '📂' },
+        { id: '15', name: 'Plan', emoji: '📅' },
+        { id: '16', name: 'Reflect', emoji: '🤔' },
+        { id: '17', name: 'Relax', emoji: '🌺' },
       ];
       setGoals(sampleGoals);
       localStorage.setItem('goals', JSON.stringify(sampleGoals));
@@ -312,7 +318,7 @@ export default function HabitTracker() {
               <button
                 onClick={addGoal}
                 disabled={!newGoalName.trim() || goals.length >= 50}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors cursor-pointer"
               >
                 Add
               </button>
@@ -321,7 +327,7 @@ export default function HabitTracker() {
                   setShowAddGoal(false);
                   setNewGoalName('');
                 }}
-                className="px-4 py-2 bg-gray-300 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-600 transition-colors"
+                className="px-4 py-2 bg-gray-300 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-600 transition-colors cursor-pointer"
               >
                 Cancel
               </button>
