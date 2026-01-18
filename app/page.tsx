@@ -42,6 +42,14 @@ const routes: RouteCard[] = [
     status: "available",
     category: "games",
   },
+  {
+    title: "Lane Rash",
+    description: "Race your bike and avoid collisions in this high-speed lane switcher!",
+    href: "/games/lanerash",
+    emoji: "🏍️",
+    status: "available",
+    category: "games",
+  },
 ];
 
 const Feature = ({ icon, title, children }: { icon: string, title: string, children: React.ReactNode }) => (

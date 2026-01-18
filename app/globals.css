@@ -4,3 +4,13 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
+
+@keyframes roadScroll {
+  from {
+    background-position-y: 0px;
+  }
+  to {
+    background-position-y: 100px; /* Should match the height of one pattern repeat */
+  }
+}
+
