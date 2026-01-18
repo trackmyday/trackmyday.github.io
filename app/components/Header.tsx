@@ -11,7 +11,13 @@ export const Header = () => {
             Track My Day
           </h1>
         </Link>
-        {/* <ThemeToggle /> */}
+        <div className="flex items-center gap-4">
+          <nav className="flex items-center gap-4">
+            <Link href="/goals" className="text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-cyan-400">Goals</Link>
+            <Link href="/whiteboard" className="text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-cyan-400">Whiteboard</Link>
+          </nav>
+          {/* <ThemeToggle /> */}
+        </div>
       </div>
     </header>
   );
