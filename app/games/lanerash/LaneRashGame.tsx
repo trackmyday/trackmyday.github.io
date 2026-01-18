@@ -23,6 +23,11 @@ const LaneRashGame: React.FC = () => {
   const [enemyBikes, setEnemyBikes] = useState<Bike[]>([]);
   const [gameOver, setGameOver] = useState<boolean>(false);
   const [score, setScore] = useState<number>(0);
+  const [isPaused, setIsPaused] = useState<boolean>(false);
+
+  const togglePause = useCallback(() => {
+    setIsPaused(prev => !prev);
+  }, []);
 
   useLayoutEffect(() => {
     if (gameAreaRef.current) {
@@ -43,7 +48,7 @@ const LaneRashGame: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (gameOver) return;
+    if (gameOver || isPaused) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'ArrowLeft') {
@@ -55,10 +60,10 @@ const LaneRashGame: React.FC = () => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [movePlayer, gameOver]);
+  }, [movePlayer, gameOver, isPaused]);
 
   useEffect(() => {
-    if (gameOver) return;
+    if (gameOver || isPaused) return;
 
     const gameLoop = setInterval(() => {
       // Move enemy bikes
@@ -86,10 +91,10 @@ const LaneRashGame: React.FC = () => {
     }, 50); // Game update every 50ms
 
     return () => clearInterval(gameLoop);
-  }, [playerBike, enemyBikes, gameOver]);
+  }, [playerBike, enemyBikes, gameOver, isPaused]);
 
   useEffect(() => {
-    if (gameOver) return;
+    if (gameOver || isPaused) return;
 
     const spawnEnemy = setInterval(() => {
       const randomX = Math.random() * (TRACK_WIDTH - BIKE_WIDTH);
@@ -101,7 +106,7 @@ const LaneRashGame: React.FC = () => {
     }, ENEMY_SPAWN_INTERVAL);
 
     return () => clearInterval(spawnEnemy);
-  }, [gameOver]);
+  }, [gameOver, isPaused]);
 
   const restartGame = () => {
     if (gameAreaRef.current) {
@@ -110,6 +115,7 @@ const LaneRashGame: React.FC = () => {
     setEnemyBikes([]);
     setGameOver(false);
     setScore(0);
+    setIsPaused(false);
   };
 
   return (
@@ -120,13 +126,13 @@ const LaneRashGame: React.FC = () => {
         width: TRACK_WIDTH,
         height: '600px',
         border: '5px solid black',
-        backgroundColor: '#333', // Solid dark road color
+        backgroundColor: '#222', // Solid dark road color
         backgroundImage: `repeating-linear-gradient(
           to bottom,
           transparent 0px,
           transparent 70px,
-          white 70px,
-          white 100px
+          rgba(255, 255, 255, 0.145) 70px,
+          #8f8f8f 100px
         )`, // White dashed lines for lanes
         backgroundSize: `100% 100px`, // Vertical repeat every 100px
         backgroundPosition: `center top`, // Animate background-position-y
@@ -134,6 +140,19 @@ const LaneRashGame: React.FC = () => {
       }}
     >
       <div className="absolute top-2 left-2 text-white text-lg">Score: {score}</div>
+      <button
+        onClick={togglePause}
+        className="absolute top-2 right-2 px-4 py-2 bg-gray-600 text-white rounded z-30"
+      >
+        {isPaused ? 'Resume' : 'Pause'}
+      </button>
+
+      {isPaused && !gameOver && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-75 text-white text-4xl z-20">
+          PAUSED
+        </div>
+      )}
+
       {playerBike && (
         <div
           className="absolute bg-blue-500"
