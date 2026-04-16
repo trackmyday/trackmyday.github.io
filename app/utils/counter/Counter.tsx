@@ -7,6 +7,9 @@ export default function Counter() {
 
   const increment = () => {
     setCount((prev) => prev + 1);
+    if (typeof navigator !== "undefined" && typeof navigator.vibrate === "function") {
+      navigator.vibrate(12);
+    }
   };
 
   return (
