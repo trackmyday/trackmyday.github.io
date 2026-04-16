@@ -3,17 +3,26 @@
 import { useEffect, useRef, useState } from "react";
 
 const COUNTER_STORAGE_KEY = "trackmyday:counter:value";
+const COUNTER_VOLUME_STORAGE_KEY = "trackmyday:counter:volume";
+const DEFAULT_TAP_VOLUME = 35;
+const MIN_TAP_VOLUME = 0;
+const MAX_TAP_VOLUME = 100;
 
 export default function Counter() {
   const [count, setCount] = useState(0);
+  const [tapVolume, setTapVolume] = useState(DEFAULT_TAP_VOLUME);
   const [isTapped, setIsTapped] = useState(false);
   const [isStorageReady, setIsStorageReady] = useState(false);
   const tapTimeoutRef = useRef<number | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
 
   useEffect(() => {
     return () => {
       if (tapTimeoutRef.current) {
         window.clearTimeout(tapTimeoutRef.current);
+      }
+      if (audioContextRef.current) {
+        void audioContextRef.current.close();
       }
     };
   }, []);
@@ -30,16 +39,32 @@ export default function Counter() {
         setCount(parsed);
       }
     }
+    const storedVolume = window.localStorage.getItem(COUNTER_VOLUME_STORAGE_KEY);
+    if (storedVolume !== null) {
+      const parsedVolume = Number.parseInt(storedVolume, 10);
+      if (!Number.isNaN(parsedVolume)) {
+        setTapVolume(Math.min(MAX_TAP_VOLUME, Math.max(MIN_TAP_VOLUME, parsedVolume)));
+      }
+    }
     setIsStorageReady(true);
 
     const handleStorageChange = (event: StorageEvent) => {
-      if (event.key !== COUNTER_STORAGE_KEY || event.newValue === null) {
+      if (event.newValue === null) {
         return;
       }
 
-      const parsed = Number.parseInt(event.newValue, 10);
-      if (!Number.isNaN(parsed)) {
-        setCount(parsed);
+      if (event.key === COUNTER_STORAGE_KEY) {
+        const parsed = Number.parseInt(event.newValue, 10);
+        if (!Number.isNaN(parsed)) {
+          setCount(parsed);
+        }
+      }
+
+      if (event.key === COUNTER_VOLUME_STORAGE_KEY) {
+        const parsedVolume = Number.parseInt(event.newValue, 10);
+        if (!Number.isNaN(parsedVolume)) {
+          setTapVolume(Math.min(MAX_TAP_VOLUME, Math.max(MIN_TAP_VOLUME, parsedVolume)));
+        }
       }
     };
 
@@ -56,6 +81,65 @@ export default function Counter() {
     window.localStorage.setItem(COUNTER_STORAGE_KEY, String(count));
   }, [count, isStorageReady]);
 
+  useEffect(() => {
+    if (!isStorageReady || typeof window === "undefined") {
+      return;
+    }
+    window.localStorage.setItem(COUNTER_VOLUME_STORAGE_KEY, String(tapVolume));
+  }, [tapVolume, isStorageReady]);
+
+  const playTapSound = (volume: number = tapVolume) => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const ContextConstructor =
+      window.AudioContext ||
+      (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (!ContextConstructor) {
+      return;
+    }
+
+    if (!audioContextRef.current) {
+      audioContextRef.current = new ContextConstructor();
+    }
+
+    const context = audioContextRef.current;
+    if (context.state === "suspended") {
+      void context.resume();
+    }
+
+    const now = context.currentTime;
+    const oscillator = context.createOscillator();
+    const gainNode = context.createGain();
+
+    oscillator.type = "sine";
+    oscillator.frequency.setValueAtTime(720, now);
+    oscillator.frequency.exponentialRampToValueAtTime(520, now + 0.06);
+
+    gainNode.gain.setValueAtTime(0.0001, now);
+    const volumeNormalized = volume / 100;
+    const targetGain = 0.00003 + Math.pow(volumeNormalized, 1.35) * 0.3;
+    gainNode.gain.exponentialRampToValueAtTime(targetGain, now + 0.01);
+    gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.08);
+
+    oscillator.connect(gainNode);
+    gainNode.connect(context.destination);
+    oscillator.start(now);
+    oscillator.stop(now + 0.09);
+  };
+
+  const updateVolume =
+    (delta: number) => (event: React.MouseEvent<HTMLButtonElement>) => {
+      event.stopPropagation();
+      setTapVolume((prev) => {
+        const next = prev + delta;
+        const bounded = Math.min(MAX_TAP_VOLUME, Math.max(MIN_TAP_VOLUME, next));
+        playTapSound(bounded);
+        return bounded;
+      });
+    };
+
   const increment = () => {
     setCount((prev) => prev + 1);
 
@@ -70,6 +154,8 @@ export default function Counter() {
     if (typeof navigator !== "undefined" && typeof navigator.vibrate === "function") {
       navigator.vibrate(12);
     }
+
+    playTapSound();
   };
 
   const resetCount = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -104,6 +190,32 @@ export default function Counter() {
       >
         Reset
       </button>
+      <div className="absolute bottom-6 left-1/2 z-20 flex -translate-x-1/2 flex-col items-center">
+        <div className="flex items-center gap-3 rounded-full border border-slate-300/70 bg-white/65 px-3 py-2 shadow-sm backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/65">
+          <button
+            type="button"
+            onClick={updateVolume(-5)}
+            className="flex h-9 w-9 items-center justify-center rounded-full text-lg font-light text-slate-600 transition-colors hover:bg-slate-200/70 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+            aria-label="Decrease tap volume"
+          >
+            -
+          </button>
+          <p className="w-14 text-center text-xs font-medium tracking-[0.16em] text-slate-600 dark:text-slate-300">
+            {tapVolume}%
+          </p>
+          <button
+            type="button"
+            onClick={updateVolume(5)}
+            className="flex h-9 w-9 items-center justify-center rounded-full text-lg font-light text-slate-600 transition-colors hover:bg-slate-200/70 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-slate-100"
+            aria-label="Increase tap volume"
+          >
+            +
+          </button>
+        </div>
+        <p className="mt-2 text-[10px] font-medium uppercase tracking-[0.2em] text-slate-500/80 dark:text-slate-400/80">
+          Volume
+        </p>
+      </div>
 
       <div className="relative z-10 flex min-h-screen -translate-y-24 flex-col items-center justify-center px-2 text-center md:-translate-y-32">
         <p
