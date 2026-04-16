@@ -2,9 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 
+const COUNTER_STORAGE_KEY = "trackmyday:counter:value";
+
 export default function Counter() {
   const [count, setCount] = useState(0);
   const [isTapped, setIsTapped] = useState(false);
+  const [isStorageReady, setIsStorageReady] = useState(false);
   const tapTimeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -14,6 +17,44 @@ export default function Counter() {
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const storedValue = window.localStorage.getItem(COUNTER_STORAGE_KEY);
+    if (storedValue !== null) {
+      const parsed = Number.parseInt(storedValue, 10);
+      if (!Number.isNaN(parsed)) {
+        setCount(parsed);
+      }
+    }
+    setIsStorageReady(true);
+
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key !== COUNTER_STORAGE_KEY || event.newValue === null) {
+        return;
+      }
+
+      const parsed = Number.parseInt(event.newValue, 10);
+      if (!Number.isNaN(parsed)) {
+        setCount(parsed);
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isStorageReady || typeof window === "undefined") {
+      return;
+    }
+    window.localStorage.setItem(COUNTER_STORAGE_KEY, String(count));
+  }, [count, isStorageReady]);
 
   const increment = () => {
     setCount((prev) => prev + 1);
