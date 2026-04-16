@@ -31,10 +31,23 @@ export default function Counter() {
     }
   };
 
+  const resetCount = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+    setCount(0);
+    setIsTapped(false);
+  };
+
   return (
-    <button
-      type="button"
+    <div
+      role="button"
+      tabIndex={0}
       onClick={increment}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          increment();
+        }
+      }}
       className={`relative min-h-screen w-full overflow-hidden bg-slate-50 text-slate-900 transition-transform duration-100 active:scale-[0.995] dark:bg-slate-950 dark:text-slate-100 ${isTapped ? "scale-[0.998]" : "scale-100"}`}
       aria-label="Tap anywhere to increment counter"
     >
@@ -42,6 +55,14 @@ export default function Counter() {
       <div
         className={`pointer-events-none absolute inset-0 bg-indigo-500/10 transition-opacity duration-150 dark:bg-cyan-400/10 ${isTapped ? "opacity-100" : "opacity-0"}`}
       />
+      <button
+        type="button"
+        onClick={resetCount}
+        className="absolute right-4 top-4 z-20 rounded-full border border-slate-300/80 bg-white/70 px-5 py-2.5 text-sm font-medium tracking-wide text-slate-600 shadow-sm backdrop-blur-sm transition-colors hover:bg-white hover:text-slate-900 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-300 dark:hover:bg-slate-900 dark:hover:text-slate-100"
+        aria-label="Reset counter"
+      >
+        Reset
+      </button>
 
       <div className="relative z-10 flex min-h-screen -translate-y-24 flex-col items-center justify-center px-2 text-center md:-translate-y-32">
         <p
@@ -50,6 +71,6 @@ export default function Counter() {
           {count}
         </p>
       </div>
-    </button>
+    </div>
   );
 }
