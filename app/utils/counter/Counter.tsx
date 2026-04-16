@@ -43,17 +43,11 @@ export default function Counter() {
         className={`pointer-events-none absolute inset-0 bg-indigo-500/10 transition-opacity duration-150 dark:bg-cyan-400/10 ${isTapped ? "opacity-100" : "opacity-0"}`}
       />
 
-      <div className="relative z-10 flex min-h-screen flex-col items-center justify-center gap-5 px-6 text-center">
-        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500 dark:text-slate-400">
-          Counter
-        </p>
+      <div className="relative z-10 flex min-h-screen -translate-y-24 flex-col items-center justify-center px-2 text-center md:-translate-y-32">
         <p
-          className={`text-7xl font-bold tracking-tight transition-transform duration-100 md:text-8xl ${isTapped ? "scale-105" : "scale-100"}`}
+          className={`text-[12rem] leading-none font-light tracking-tight transition-transform duration-100 sm:text-[14rem] md:text-[18rem] ${isTapped ? "scale-105" : "scale-100"}`}
         >
           {count}
-        </p>
-        <p className="text-sm text-slate-600 dark:text-slate-400">
-          Tap anywhere to increment
         </p>
       </div>
     </button>
