@@ -35,6 +35,14 @@ const routes: RouteCard[] = [
     category: "utils",
   },
   {
+    title: "Counter",
+    description: "A clean fullscreen tap counter to track quick reps.",
+    href: "/utils/counter",
+    emoji: "🔢",
+    status: "available",
+    category: "utils",
+  },
+  {
     title: "Tetris",
     description: "Play a classic game of Tetris.",
     href: "/games/tetris",
