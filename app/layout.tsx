@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import { Footer } from "./components/Footer";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Providers } from "./providers";
-import { Header } from "./components/Header";
+import { LayoutChrome } from "./components/LayoutChrome";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -31,11 +30,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200`}
       >
         <Providers>
-          <div className="flex flex-col min-h-screen">
-            <Header />
-            <main className="flex-grow">{children}</main>
-            <Footer />
-          </div>
+          <LayoutChrome>{children}</LayoutChrome>
         </Providers>
       </body>
     </html>
