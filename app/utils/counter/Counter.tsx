@@ -6,15 +6,18 @@ const COUNTER_STORAGE_KEY = "trackmyday:counter:value";
 const COUNTER_VOLUME_STORAGE_KEY = "trackmyday:counter:volume";
 const COUNTER_THEME_STORAGE_KEY = "trackmyday:counter:theme";
 const COUNTER_MUTE_STORAGE_KEY = "trackmyday:counter:muted";
+const COUNTER_GOAL_STORAGE_KEY = "trackmyday:counter:goal";
 const DEFAULT_TAP_VOLUME = 35;
 const MIN_TAP_VOLUME = 0;
 const MAX_TAP_VOLUME = 100;
+const DEFAULT_GOAL = 6000;
 const TAP_THEMES = ["click", "pop", "wood"] as const;
 
 type TapTheme = (typeof TAP_THEMES)[number];
 
 export default function Counter() {
   const [count, setCount] = useState(0);
+  const [goal, setGoal] = useState(DEFAULT_GOAL);
   const [tapVolume, setTapVolume] = useState(DEFAULT_TAP_VOLUME);
   const [tapTheme, setTapTheme] = useState<TapTheme>("click");
   const [isMuted, setIsMuted] = useState(false);
@@ -70,6 +73,13 @@ export default function Counter() {
     if (storedMute !== null) {
       setIsMuted(storedMute === "true");
     }
+    const storedGoal = window.localStorage.getItem(COUNTER_GOAL_STORAGE_KEY);
+    if (storedGoal !== null) {
+      const parsedGoal = Number.parseInt(storedGoal, 10);
+      if (!Number.isNaN(parsedGoal) && parsedGoal > 0) {
+        setGoal(parsedGoal);
+      }
+    }
     setIsStorageReady(true);
 
     const handleStorageChange = (event: StorageEvent) => {
@@ -97,6 +107,13 @@ export default function Counter() {
 
       if (event.key === COUNTER_MUTE_STORAGE_KEY) {
         setIsMuted(event.newValue === "true");
+      }
+
+      if (event.key === COUNTER_GOAL_STORAGE_KEY) {
+        const parsedGoal = Number.parseInt(event.newValue, 10);
+        if (!Number.isNaN(parsedGoal) && parsedGoal > 0) {
+          setGoal(parsedGoal);
+        }
       }
     };
 
@@ -133,6 +150,13 @@ export default function Counter() {
     }
     window.localStorage.setItem(COUNTER_MUTE_STORAGE_KEY, String(isMuted));
   }, [isMuted, isStorageReady]);
+
+  useEffect(() => {
+    if (!isStorageReady || typeof window === "undefined") {
+      return;
+    }
+    window.localStorage.setItem(COUNTER_GOAL_STORAGE_KEY, String(goal));
+  }, [goal, isStorageReady]);
 
   const playTapSound = (volume: number = tapVolume, theme: TapTheme = tapTheme) => {
     if (isMuted || volume <= 0) {
@@ -243,6 +267,9 @@ export default function Counter() {
     setIsTapped(false);
   };
 
+  const progress = Math.min(count / Math.max(goal, 1), 1);
+  const waveHeight = Math.max(progress * 100, 6);
+
   return (
     <div
       role="button"
@@ -325,12 +352,54 @@ export default function Counter() {
         </div>
       </div>
 
-      <div className="relative z-10 flex min-h-screen -translate-y-24 flex-col items-center justify-center px-2 text-center md:-translate-y-32">
-        <p
-          className={`text-[12rem] leading-none font-light tracking-tight transition-transform duration-100 sm:text-[14rem] md:text-[18rem] ${isTapped ? "scale-105" : "scale-100"}`}
-        >
-          {count}
-        </p>
+      <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-4 pb-40 pt-10 text-center">
+        <div className="relative h-[320px] w-[320px] max-w-[88vw] rounded-full border border-white/20 bg-slate-900/15 shadow-[0_20px_60px_rgba(15,23,42,0.25)] backdrop-blur-sm dark:bg-slate-900/30">
+          <div className="absolute inset-0 overflow-hidden rounded-full">
+            <div className="absolute inset-0 bg-slate-900/10 dark:bg-slate-900/25" />
+            <div
+              className="absolute inset-x-0 bottom-0 transition-[height] duration-300"
+              style={{ height: `${waveHeight}%` }}
+            >
+              <div className="absolute -top-7 left-[-10%] h-14 w-[120%] rounded-[100%] bg-emerald-400/90" />
+              <div className="absolute inset-0 bg-emerald-400/88" />
+            </div>
+          </div>
+
+          <div
+            className="absolute left-1/2 top-9 z-20 -translate-x-1/2"
+            onClick={(event) => {
+              event.stopPropagation();
+            }}
+          >
+            <label className="text-center">
+              <input
+                type="number"
+                min={1}
+                step={1}
+                value={goal}
+                onChange={(event) => {
+                  const nextGoal = Number.parseInt(event.target.value, 10);
+                  if (!Number.isNaN(nextGoal) && nextGoal > 0) {
+                    setGoal(nextGoal);
+                  }
+                }}
+                onClick={(event) => {
+                  event.stopPropagation();
+                }}
+                className="w-[6ch] appearance-none bg-transparent px-0 py-0 text-center text-[10px] font-medium tracking-[0.2em] text-white/80 outline-none [text-shadow:0_2px_8px_rgba(15,23,42,0.22)]"
+                aria-label="Goal value"
+              />
+            </label>
+          </div>
+
+          <div className="absolute inset-0 z-10 flex items-center justify-center pt-4">
+            <p
+              className={`text-[6.1rem] leading-none font-semibold tracking-tight text-white drop-shadow-[0_8px_26px_rgba(15,23,42,0.48)] transition-transform duration-100 sm:text-[7rem] md:text-[7.8rem] ${isTapped ? "scale-105" : "scale-100"}`}
+            >
+              {count}
+            </p>
+          </div>
+        </div>
       </div>
       <div
         aria-hidden
