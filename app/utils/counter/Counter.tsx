@@ -358,9 +358,23 @@ export default function Counter() {
             <div className="absolute inset-0 bg-slate-900/10 dark:bg-slate-900/25" />
             <div
               className="absolute inset-x-0 bottom-0 transition-[height] duration-300"
-              style={{ height: `${waveHeight}%` }}
+              style={{ height: `${waveHeight}%`, width: `110%`, rotate: `-6deg` }}
             >
-              <div className="absolute -top-7 left-[-10%] h-14 w-[120%] rounded-[100%] bg-emerald-400/90" />
+              <svg
+                className="absolute -top-9 left-0 h-10 w-full"
+                viewBox="0 0 320 48"
+                preserveAspectRatio="none"
+                aria-hidden
+              >
+                <path
+                  d="M0 30 C32 4, 84 54, 130 30 C176 6, 232 50, 276 28 C298 18, 310 18, 320 24 L320 48 L0 48 Z"
+                  className="fill-emerald-300/85"
+                />
+                <path
+                  d="M0 36 C44 10, 102 56, 150 34 C202 10, 252 52, 320 28 L320 48 L0 48 Z"
+                  className="fill-emerald-400/90"
+                />
+              </svg>
               <div className="absolute inset-0 bg-emerald-400/88" />
             </div>
           </div>
@@ -386,7 +400,7 @@ export default function Counter() {
                 onClick={(event) => {
                   event.stopPropagation();
                 }}
-                className="w-[6ch] appearance-none bg-transparent px-0 py-0 text-center text-[10px] font-medium tracking-[0.2em] text-white/80 outline-none [text-shadow:0_2px_8px_rgba(15,23,42,0.22)]"
+                className="w-[6ch] appearance-none bg-transparent px-0 py-0 text-center text-[12px] font-medium tracking-[0.2em] text-white/80 outline-none [text-shadow:0_2px_8px_rgba(15,23,42,0.22)]"
                 aria-label="Goal value"
               />
             </label>
