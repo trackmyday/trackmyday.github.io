@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 
 const COUNTER_STORAGE_KEY = "trackmyday:counter:value";
 const COUNTER_VOLUME_STORAGE_KEY = "trackmyday:counter:volume";
@@ -22,6 +22,9 @@ export default function Counter() {
   const [isStorageReady, setIsStorageReady] = useState(false);
   const tapTimeoutRef = useRef<number | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
+  const hapticInputRef = useRef<HTMLInputElement | null>(null);
+  const hapticLabelRef = useRef<HTMLLabelElement | null>(null);
+  const hapticInputId = useId();
 
   useEffect(() => {
     return () => {
@@ -32,6 +35,12 @@ export default function Counter() {
         void audioContextRef.current.close();
       }
     };
+  }, []);
+
+  useEffect(() => {
+    if (hapticInputRef.current) {
+      hapticInputRef.current.setAttribute("switch", "");
+    }
   }, []);
 
   useEffect(() => {
@@ -203,6 +212,15 @@ export default function Counter() {
     setIsMuted((prev) => !prev);
   };
 
+  const triggerTapHaptic = () => {
+    if (typeof navigator !== "undefined" && typeof navigator.vibrate === "function") {
+      navigator.vibrate(12);
+      return;
+    }
+
+    hapticLabelRef.current?.click();
+  };
+
   const increment = () => {
     setCount((prev) => prev + 1);
 
@@ -214,9 +232,7 @@ export default function Counter() {
       setIsTapped(false);
     }, 120);
 
-    if (typeof navigator !== "undefined" && typeof navigator.vibrate === "function") {
-      navigator.vibrate(12);
-    }
+    triggerTapHaptic();
 
     playTapSound();
   };
@@ -315,6 +331,31 @@ export default function Counter() {
         >
           {count}
         </p>
+      </div>
+      <div
+        aria-hidden
+        className="pointer-events-none absolute h-0 w-0 overflow-hidden opacity-0"
+        onClickCapture={(event) => {
+          event.stopPropagation();
+        }}
+      >
+        <input
+          ref={hapticInputRef}
+          id={hapticInputId}
+          type="checkbox"
+          onClick={(event) => {
+            event.stopPropagation();
+          }}
+        />
+        <label
+          ref={hapticLabelRef}
+          htmlFor={hapticInputId}
+          onClick={(event) => {
+            event.stopPropagation();
+          }}
+        >
+          haptic fallback
+        </label>
       </div>
     </div>
   );
