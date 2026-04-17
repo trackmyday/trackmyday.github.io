@@ -28,6 +28,7 @@ export default function Counter() {
   const hapticInputRef = useRef<HTMLInputElement | null>(null);
   const hapticLabelRef = useRef<HTMLLabelElement | null>(null);
   const hapticInputId = useId();
+  const touchStartYRef = useRef<number | null>(null);
 
   useEffect(() => {
     return () => {
@@ -275,6 +276,17 @@ export default function Counter() {
       role="button"
       tabIndex={0}
       onClick={increment}
+      onTouchStart={(e) => {
+        touchStartYRef.current = e.touches[0].clientY;
+      }}
+      onTouchEnd={(e) => {
+        if (touchStartYRef.current === null) return;
+        const deltaY = e.changedTouches[0].clientY - touchStartYRef.current;
+        if (deltaY < -50) {
+          increment();
+        }
+        touchStartYRef.current = null;
+      }}
       onKeyDown={(event) => {
         if (event.key === "Enter" || event.key === " ") {
           event.preventDefault();
