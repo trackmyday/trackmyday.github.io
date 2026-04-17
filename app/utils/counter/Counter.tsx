@@ -10,7 +10,7 @@ const COUNTER_GOAL_STORAGE_KEY = "trackmyday:counter:goal";
 const DEFAULT_TAP_VOLUME = 35;
 const MIN_TAP_VOLUME = 0;
 const MAX_TAP_VOLUME = 100;
-const DEFAULT_GOAL = 6000;
+const DEFAULT_GOAL = 108;
 const TAP_THEMES = ["click", "pop", "wood"] as const;
 
 type TapTheme = (typeof TAP_THEMES)[number];
