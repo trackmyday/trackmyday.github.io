@@ -4,13 +4,20 @@ import { useEffect, useRef, useState } from "react";
 
 const COUNTER_STORAGE_KEY = "trackmyday:counter:value";
 const COUNTER_VOLUME_STORAGE_KEY = "trackmyday:counter:volume";
+const COUNTER_THEME_STORAGE_KEY = "trackmyday:counter:theme";
+const COUNTER_MUTE_STORAGE_KEY = "trackmyday:counter:muted";
 const DEFAULT_TAP_VOLUME = 35;
 const MIN_TAP_VOLUME = 0;
 const MAX_TAP_VOLUME = 100;
+const TAP_THEMES = ["click", "pop", "wood"] as const;
+
+type TapTheme = (typeof TAP_THEMES)[number];
 
 export default function Counter() {
   const [count, setCount] = useState(0);
   const [tapVolume, setTapVolume] = useState(DEFAULT_TAP_VOLUME);
+  const [tapTheme, setTapTheme] = useState<TapTheme>("click");
+  const [isMuted, setIsMuted] = useState(false);
   const [isTapped, setIsTapped] = useState(false);
   const [isStorageReady, setIsStorageReady] = useState(false);
   const tapTimeoutRef = useRef<number | null>(null);
@@ -46,6 +53,14 @@ export default function Counter() {
         setTapVolume(Math.min(MAX_TAP_VOLUME, Math.max(MIN_TAP_VOLUME, parsedVolume)));
       }
     }
+    const storedTheme = window.localStorage.getItem(COUNTER_THEME_STORAGE_KEY);
+    if (storedTheme && TAP_THEMES.includes(storedTheme as TapTheme)) {
+      setTapTheme(storedTheme as TapTheme);
+    }
+    const storedMute = window.localStorage.getItem(COUNTER_MUTE_STORAGE_KEY);
+    if (storedMute !== null) {
+      setIsMuted(storedMute === "true");
+    }
     setIsStorageReady(true);
 
     const handleStorageChange = (event: StorageEvent) => {
@@ -65,6 +80,14 @@ export default function Counter() {
         if (!Number.isNaN(parsedVolume)) {
           setTapVolume(Math.min(MAX_TAP_VOLUME, Math.max(MIN_TAP_VOLUME, parsedVolume)));
         }
+      }
+
+      if (event.key === COUNTER_THEME_STORAGE_KEY && TAP_THEMES.includes(event.newValue as TapTheme)) {
+        setTapTheme(event.newValue as TapTheme);
+      }
+
+      if (event.key === COUNTER_MUTE_STORAGE_KEY) {
+        setIsMuted(event.newValue === "true");
       }
     };
 
@@ -88,7 +111,24 @@ export default function Counter() {
     window.localStorage.setItem(COUNTER_VOLUME_STORAGE_KEY, String(tapVolume));
   }, [tapVolume, isStorageReady]);
 
-  const playTapSound = (volume: number = tapVolume) => {
+  useEffect(() => {
+    if (!isStorageReady || typeof window === "undefined") {
+      return;
+    }
+    window.localStorage.setItem(COUNTER_THEME_STORAGE_KEY, tapTheme);
+  }, [tapTheme, isStorageReady]);
+
+  useEffect(() => {
+    if (!isStorageReady || typeof window === "undefined") {
+      return;
+    }
+    window.localStorage.setItem(COUNTER_MUTE_STORAGE_KEY, String(isMuted));
+  }, [isMuted, isStorageReady]);
+
+  const playTapSound = (volume: number = tapVolume, theme: TapTheme = tapTheme) => {
+    if (isMuted || volume <= 0) {
+      return;
+    }
     if (typeof window === "undefined") {
       return;
     }
@@ -113,20 +153,31 @@ export default function Counter() {
     const oscillator = context.createOscillator();
     const gainNode = context.createGain();
 
-    oscillator.type = "sine";
-    oscillator.frequency.setValueAtTime(720, now);
-    oscillator.frequency.exponentialRampToValueAtTime(520, now + 0.06);
+    if (theme === "click") {
+      oscillator.type = "sine";
+      oscillator.frequency.setValueAtTime(720, now);
+      oscillator.frequency.exponentialRampToValueAtTime(520, now + 0.06);
+    } else if (theme === "pop") {
+      oscillator.type = "triangle";
+      oscillator.frequency.setValueAtTime(520, now);
+      oscillator.frequency.exponentialRampToValueAtTime(280, now + 0.075);
+    } else {
+      oscillator.type = "triangle";
+      oscillator.frequency.setValueAtTime(240, now);
+      oscillator.frequency.exponentialRampToValueAtTime(140, now + 0.09);
+    }
 
     gainNode.gain.setValueAtTime(0.0001, now);
     const volumeNormalized = volume / 100;
-    const targetGain = 0.00003 + Math.pow(volumeNormalized, 1.35) * 0.3;
+    const themeMultiplier = theme === "click" ? 1 : theme === "pop" ? 1 : 1.15;
+    const targetGain = (0.00003 + Math.pow(volumeNormalized, 1.35) * 0.3) * themeMultiplier;
     gainNode.gain.exponentialRampToValueAtTime(targetGain, now + 0.01);
-    gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.08);
+    gainNode.gain.exponentialRampToValueAtTime(0.0001, now + (theme === "click" ? 0.08 : 0.1));
 
     oscillator.connect(gainNode);
     gainNode.connect(context.destination);
     oscillator.start(now);
-    oscillator.stop(now + 0.09);
+    oscillator.stop(now + (theme === "click" ? 0.09 : theme === "pop" ? 0.09 : 0.11));
   };
 
   const updateVolume =
@@ -139,6 +190,18 @@ export default function Counter() {
         return bounded;
       });
     };
+
+  const selectTheme =
+    (theme: TapTheme) => (event: React.MouseEvent<HTMLButtonElement>) => {
+      event.stopPropagation();
+      setTapTheme(theme);
+      playTapSound(tapVolume, theme);
+    };
+
+  const toggleMute = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+    setIsMuted((prev) => !prev);
+  };
 
   const increment = () => {
     setCount((prev) => prev + 1);
@@ -215,6 +278,35 @@ export default function Counter() {
         <p className="mt-2 text-[10px] font-medium uppercase tracking-[0.2em] text-slate-500/80 dark:text-slate-400/80">
           Volume
         </p>
+        <div className="mt-2 flex items-center gap-2 rounded-full border border-slate-300/60 bg-white/60 px-2 py-1.5 shadow-sm backdrop-blur-sm dark:border-slate-700 dark:bg-slate-900/60">
+          {TAP_THEMES.map((theme) => (
+            <button
+              key={theme}
+              type="button"
+              onClick={selectTheme(theme)}
+              className={`rounded-full px-3 py-1 text-[11px] font-medium uppercase tracking-[0.12em] transition-colors ${
+                tapTheme === theme
+                  ? "bg-slate-800 text-white dark:bg-slate-100 dark:text-slate-900"
+                  : "text-slate-600 hover:bg-slate-200/70 dark:text-slate-300 dark:hover:bg-slate-800"
+              }`}
+              aria-label={`Use ${theme} tap sound`}
+            >
+              {theme}
+            </button>
+          ))}
+          <button
+            type="button"
+            onClick={toggleMute}
+            className={`rounded-full px-3 py-1 text-[11px] font-medium uppercase tracking-[0.12em] transition-colors ${
+              isMuted
+                ? "bg-rose-600 text-white dark:bg-rose-500"
+                : "text-slate-600 hover:bg-slate-200/70 dark:text-slate-300 dark:hover:bg-slate-800"
+            }`}
+            aria-label={isMuted ? "Unmute tap sound" : "Mute tap sound"}
+          >
+            {isMuted ? "Unmute" : "Mute"}
+          </button>
+        </div>
       </div>
 
       <div className="relative z-10 flex min-h-screen -translate-y-24 flex-col items-center justify-center px-2 text-center md:-translate-y-32">
