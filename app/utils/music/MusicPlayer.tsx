@@ -193,7 +193,7 @@ export default function MusicPlayer({ initialAlbums }: Props) {
                           </div>
                         )}
                         <div className="flex flex-col">
-                          <span className="text-sm font-medium truncate max-w-md">{track.name.replace(/\.mp3$/i, '')}</span>
+                          <span className="text-sm font-medium truncate max-w-md text-wrap">{track.name.replace(/\.mp3$/i, '')}</span>
                         </div>
                       </div>
                       <div className={`opacity-0 group-hover:opacity-100 transition-opacity ${currentTrack?.id === track.id ? 'opacity-100' : ''}`}>
