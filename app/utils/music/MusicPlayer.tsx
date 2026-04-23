@@ -202,13 +202,13 @@ export default function MusicPlayer({ initialAlbums }: Props) {
         {/* Tracklist Area */}
         <div className="flex-1 bg-gray-50/30 dark:bg-zinc-900/30">
           {activeAlbum ? (
-            <div className="p-6 pb-24">
+            <div className="p-6 pb-4">
               <h2 className="text-xl font-bold mb-6 text-gray-900 dark:text-gray-100 flex items-center gap-2">
                 {activeAlbum.name}
               </h2>
               
               {activeAlbum.tracks.length > 0 ? (
-                <div className="space-y-1">
+                <div className="space-y-1 max-h-[50vh] overflow-y-auto">
                   {activeAlbum.tracks.map((track, index) => (
                     <div 
                       key={track.id}
