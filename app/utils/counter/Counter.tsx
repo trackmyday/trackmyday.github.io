@@ -204,7 +204,7 @@ export default function Counter() {
     gainNode.gain.setValueAtTime(0.0001, now);
     const volumeNormalized = volume / 100;
     const themeMultiplier = theme === "click" ? 1 : theme === "pop" ? 1 : 1.15;
-    const targetGain = (0.00003 + Math.pow(volumeNormalized, 1.35) * 0.3) * themeMultiplier;
+    const targetGain = (0.00003 + Math.pow(volumeNormalized, 1.35) * 6) * themeMultiplier;
     gainNode.gain.exponentialRampToValueAtTime(targetGain, now + 0.01);
     gainNode.gain.exponentialRampToValueAtTime(0.0001, now + (theme === "click" ? 0.08 : 0.1));
 
