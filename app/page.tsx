@@ -43,6 +43,14 @@ const routes: RouteCard[] = [
     category: "utils",
   },
   {
+    title: "Music",
+    description: "A minimalistic local music player to listen to your favorite songs.",
+    href: "/utils/music",
+    emoji: "🎵",
+    status: "available",
+    category: "utils",
+  },
+  {
     title: "Tetris",
     description: "Play a classic game of Tetris.",
     href: "/games/tetris",

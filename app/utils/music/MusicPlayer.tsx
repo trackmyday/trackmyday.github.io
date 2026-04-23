@@ -113,6 +113,19 @@ export default function MusicPlayer({ initialAlbums }: Props) {
     }
   };
 
+  const handleSeek = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (audioRef.current && currentTrack) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const newProgress = (clickX / rect.width) * 100;
+      const newTime = (newProgress / 100) * audioRef.current.duration;
+      if (isFinite(newTime)) {
+        audioRef.current.currentTime = newTime;
+        setProgress(newProgress);
+      }
+    }
+  };
+
   const handleTrackEnded = () => {
     handleNext();
   };
@@ -240,11 +253,16 @@ export default function MusicPlayer({ initialAlbums }: Props) {
           </div>
           {/* Progress Bar */}
           <div className="w-full max-w-md flex items-center gap-2">
-            <div className="h-1 flex-1 bg-gray-200 dark:bg-zinc-700 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-black dark:bg-white transition-all duration-150 ease-linear" 
-                style={{ width: `${progress}%` }}
-              ></div>
+            <div 
+              className={`w-full py-2 ${currentTrack ? 'cursor-pointer' : ''}`}
+              onClick={handleSeek}
+            >
+              <div className="h-1.5 w-full bg-gray-200 dark:bg-zinc-700 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-black dark:bg-white transition-all duration-150 ease-linear" 
+                  style={{ width: `${progress}%` }}
+                ></div>
+              </div>
             </div>
           </div>
         </div>

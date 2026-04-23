@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import { Footer } from "./Footer";
 import { Header } from "./Header";
 
-const CHROMELESS_ROUTES = ["/utils/counter"];
+const CHROMELESS_ROUTES = ["/utils/counter", "/utils/music"];
 const CHROMELESS_ROUTE_PREFIXES = ["/games/"];
 
 export function LayoutChrome({ children }: { children: React.ReactNode }) {

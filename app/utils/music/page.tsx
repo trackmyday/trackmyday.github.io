@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import Image from 'next/image';
 import fs from 'fs';
 import path from 'path';
 import MusicPlayer from './MusicPlayer';
@@ -62,9 +63,9 @@ export default function MusicPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 text-gray-900 dark:text-gray-100 p-4 md:p-8 flex flex-col">
-      <header className="mb-8">
+      <header className="mb-8 flex items-center gap-3">
+        <Image src="/music.png" alt="Music" width={32} height={32} className="w-8 h-8" />
         <h1 className="text-2xl font-bold tracking-tight">Music Player</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Play local music from your library</p>
       </header>
       <main className="flex-grow flex flex-col relative bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-gray-200 dark:border-zinc-800 overflow-hidden">
         <MusicPlayer initialAlbums={albums} />
