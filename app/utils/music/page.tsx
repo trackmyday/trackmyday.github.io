@@ -46,7 +46,7 @@ function getLocalMusic(): Album[] {
           const tags = NodeID3.read(filePath);
           let coverUrl: string | undefined;
           
-          if (tags.image && tags.image.imageBuffer) {
+          if (tags.image && typeof tags.image !== 'string' && tags.image.imageBuffer) {
             coverUrl = `data:${tags.image.mime};base64,${tags.image.imageBuffer.toString('base64')}`;
           }
 
