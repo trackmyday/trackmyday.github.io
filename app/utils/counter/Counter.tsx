@@ -23,17 +23,27 @@ export default function Counter() {
   const [isMuted, setIsMuted] = useState(false);
   const [isTapped, setIsTapped] = useState(false);
   const [isStorageReady, setIsStorageReady] = useState(false);
+  const [isChanting, setIsChanting] = useState(false);
   const tapTimeoutRef = useRef<number | null>(null);
+  const chantIntervalRef = useRef<number | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
+  const isMutedRef = useRef(isMuted);
   const hapticInputRef = useRef<HTMLInputElement | null>(null);
   const hapticLabelRef = useRef<HTMLLabelElement | null>(null);
   const hapticInputId = useId();
   const touchStartYRef = useRef<number | null>(null);
 
   useEffect(() => {
+    isMutedRef.current = isMuted;
+  }, [isMuted]);
+
+  useEffect(() => {
     return () => {
       if (tapTimeoutRef.current) {
         window.clearTimeout(tapTimeoutRef.current);
+      }
+      if (chantIntervalRef.current) {
+        window.clearInterval(chantIntervalRef.current);
       }
       if (audioContextRef.current) {
         void audioContextRef.current.close();
@@ -204,7 +214,7 @@ export default function Counter() {
     gainNode.gain.setValueAtTime(0.0001, now);
     const volumeNormalized = volume / 100;
     const themeMultiplier = theme === "click" ? 1 : theme === "pop" ? 1 : 1.15;
-    const targetGain = (0.00003 + Math.pow(volumeNormalized, 1.35) * 6) * themeMultiplier;
+    const targetGain = (0.00003 + Math.pow(volumeNormalized, 1.35) * 1.2) * themeMultiplier;
     gainNode.gain.exponentialRampToValueAtTime(targetGain, now + 0.01);
     gainNode.gain.exponentialRampToValueAtTime(0.0001, now + (theme === "click" ? 0.08 : 0.1));
 
@@ -212,6 +222,94 @@ export default function Counter() {
     gainNode.connect(context.destination);
     oscillator.start(now);
     oscillator.stop(now + (theme === "click" ? 0.09 : theme === "pop" ? 0.09 : 0.11));
+  };
+
+  const playChantBeatRef = useRef(() => {});
+  playChantBeatRef.current = () => {
+    if (isMutedRef.current) return;
+    if (typeof window === "undefined") return;
+
+    const ContextConstructor =
+      window.AudioContext ||
+      (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (!ContextConstructor) return;
+
+    if (!audioContextRef.current) {
+      audioContextRef.current = new ContextConstructor();
+    }
+
+    const context = audioContextRef.current;
+    if (context.state === "suspended") {
+      void context.resume();
+    }
+
+    const now = context.currentTime;
+    const oscillator = context.createOscillator();
+    const gainNode = context.createGain();
+
+    const beatIndex = (playChantBeatRef as any).beatIndex || 0;
+    (playChantBeatRef as any).beatIndex = beatIndex + 1;
+    const cycleIndex = beatIndex % 4;
+
+    let startFreq = 180;
+    let endFreq = 50;
+    let maxGain = 8;
+
+    if (cycleIndex === 0) {
+      // Bayan (Deep bass hit)
+      startFreq = 130;
+      endFreq = 40;
+      maxGain = 12;
+    } else if (cycleIndex === 2) {
+      // Mid hit
+      startFreq = 220;
+      endFreq = 90;
+      maxGain = 6;
+    } else {
+      // Dayan (Higher pitch hit)
+      startFreq = 280;
+      endFreq = 120;
+      maxGain = 4;
+    }
+
+    oscillator.type = "sine";
+    oscillator.frequency.setValueAtTime(startFreq, now);
+    oscillator.frequency.exponentialRampToValueAtTime(endFreq, now + 0.35);
+
+    gainNode.gain.setValueAtTime(0.0001, now);
+    gainNode.gain.exponentialRampToValueAtTime(maxGain, now + 0.015);
+    gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.35);
+
+    oscillator.connect(gainNode);
+    gainNode.connect(context.destination);
+    oscillator.start(now);
+    oscillator.stop(now + 0.4);
+  };
+
+  useEffect(() => {
+    if (isChanting) {
+      (playChantBeatRef as any).beatIndex = 0;
+      playChantBeatRef.current();
+      chantIntervalRef.current = window.setInterval(() => {
+        playChantBeatRef.current();
+      }, 750);
+    } else {
+      if (chantIntervalRef.current) {
+        window.clearInterval(chantIntervalRef.current);
+        chantIntervalRef.current = null;
+      }
+    }
+    return () => {
+      if (chantIntervalRef.current) {
+        window.clearInterval(chantIntervalRef.current);
+        chantIntervalRef.current = null;
+      }
+    };
+  }, [isChanting]);
+
+  const toggleChanting = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
+    setIsChanting((prev) => !prev);
   };
 
   const updateVolume =
@@ -300,6 +398,18 @@ export default function Counter() {
       <div
         className={`pointer-events-none absolute inset-0 bg-indigo-500/10 transition-opacity duration-150 dark:bg-cyan-400/10 ${isTapped ? "opacity-100" : "opacity-0"}`}
       />
+      <button
+        type="button"
+        onClick={toggleChanting}
+        className={`absolute left-4 top-4 z-20 rounded-full border px-5 py-2.5 text-sm font-medium tracking-wide shadow-sm backdrop-blur-sm transition-colors ${
+          isChanting
+            ? "border-indigo-300 bg-indigo-100 text-indigo-900 dark:border-indigo-700/80 dark:bg-indigo-900/80 dark:text-indigo-100"
+            : "border-slate-300/80 bg-white/70 text-slate-600 hover:bg-white hover:text-slate-900 dark:border-slate-700 dark:bg-slate-900/70 dark:text-slate-300 dark:hover:bg-slate-900 dark:hover:text-slate-100"
+        }`}
+        aria-label={isChanting ? "Stop chanting beat" : "Start chanting beat"}
+      >
+        {isChanting ? "Chanting" : "Chant"}
+      </button>
       <button
         type="button"
         onClick={resetCount}
