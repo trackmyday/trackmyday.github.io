@@ -215,68 +215,73 @@ export default function MusicPlayer({ initialAlbums }: Props) {
       </div>
 
       {/* Player Footer */}
-      <div className="fixed bottom-0 left-0 w-full z-50 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md border-t border-gray-200 dark:border-zinc-800 p-4 flex flex-col md:flex-row items-center gap-4 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)]">
+      <div className="fixed bottom-0 left-0 w-full z-50 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md border-t border-gray-200 dark:border-zinc-800 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)] flex flex-col">
         
-        {/* Current Track Info */}
-        <div className="w-full md:w-1/3 flex items-center gap-3 min-w-0">
-          <div className="w-10 h-10 bg-gray-100 dark:bg-zinc-800 rounded flex items-center justify-center flex-shrink-0 text-gray-400 relative overflow-hidden">
+        {/* Top section: Image + Controls/Info */}
+        <div className="flex p-4 gap-6 items-center">
+          
+          {/* Album Image */}
+          <div className="w-28 h-28 md:w-28 md:h-28 flex-shrink-0 bg-gray-100 dark:bg-zinc-800 rounded-lg relative overflow-hidden flex items-center justify-center text-gray-400 shadow-sm">
             {currentTrack?.coverUrl ? (
               <Image src={currentTrack.coverUrl} alt="Cover" fill className="object-cover" unoptimized />
             ) : (
               <MusicIcon />
             )}
           </div>
-          <div className="min-w-0 flex-1">
-            <h4 className="text-sm font-bold truncate text-gray-900 dark:text-gray-100">
-              {currentTrack ? currentTrack.name.replace(/\.mp3$/i, '') : 'No track selected'}
-            </h4>
-            <p className="text-xs text-gray-500 truncate">{activeAlbum?.name || '---'}</p>
+
+          {/* Info and Controls */}
+          <div className="flex-1 flex flex-col md:flex-row items-center justify-between min-w-0 gap-4">
+            
+            {/* Current Track Info */}
+            <div className="w-full md:w-1/3 flex flex-col justify-center min-w-0 text-center md:text-left">
+              <h4 className="text-lg font-bold truncate text-gray-900 dark:text-gray-100">
+                {currentTrack ? currentTrack.name.replace(/\.mp3$/i, '') : 'No track selected'}
+              </h4>
+              <p className="text-sm text-gray-500 truncate">{activeAlbum?.name || '---'}</p>
+            </div>
+
+            {/* Playback Controls */}
+            <div className="w-full md:w-1/3 flex items-center justify-center gap-6">
+              <button 
+                onClick={handlePrev} 
+                disabled={!currentTrack}
+                className="text-gray-500 hover:text-black dark:hover:text-white disabled:opacity-30 transition-colors [&>svg]:w-8 [&>svg]:h-8"
+              >
+                <PrevIcon />
+              </button>
+              <button 
+                onClick={togglePlay}
+                disabled={!currentTrack}
+                className="w-14 h-14 rounded-full bg-black dark:bg-white text-white dark:text-black flex items-center justify-center disabled:opacity-30 hover:scale-105 transition-transform [&>svg]:w-8 [&>svg]:h-8"
+              >
+                {isPlaying ? <PauseIcon /> : <PlayIcon />}
+              </button>
+              <button 
+                onClick={handleNext}
+                disabled={!currentTrack}
+                className="text-gray-500 hover:text-black dark:hover:text-white disabled:opacity-30 transition-colors [&>svg]:w-8 [&>svg]:h-8"
+              >
+                <NextIcon />
+              </button>
+            </div>
+            
+            {/* Empty space for balance */}
+            <div className="hidden md:block w-1/3"></div>
           </div>
         </div>
 
-        {/* Controls */}
-        <div className="w-full md:w-1/3 flex flex-col items-center gap-2">
-          <div className="flex items-center gap-6">
-            <button 
-              onClick={handlePrev} 
-              disabled={!currentTrack}
-              className="text-gray-500 hover:text-black dark:hover:text-white disabled:opacity-30 transition-colors [&>svg]:w-8 [&>svg]:h-8"
-            >
-              <PrevIcon />
-            </button>
-            <button 
-              onClick={togglePlay}
-              disabled={!currentTrack}
-              className="w-14 h-14 rounded-full bg-black dark:bg-white text-white dark:text-black flex items-center justify-center disabled:opacity-30 hover:scale-105 transition-transform [&>svg]:w-8 [&>svg]:h-8"
-            >
-              {isPlaying ? <PauseIcon /> : <PlayIcon />}
-            </button>
-            <button 
-              onClick={handleNext}
-              disabled={!currentTrack}
-              className="text-gray-500 hover:text-black dark:hover:text-white disabled:opacity-30 transition-colors [&>svg]:w-8 [&>svg]:h-8"
-            >
-              <NextIcon />
-            </button>
-          </div>
-          {/* Progress Bar */}
-          <div className="w-full max-w-md flex items-center gap-2">
+        {/* Progress Bar (Full Width Bottom) */}
+        <div className="w-full px-4 md:px-8 mb-12 mt-2">
+          <div 
+            className={`w-full h-1.5 bg-gray-200 dark:bg-zinc-700 rounded-full overflow-hidden ${currentTrack ? 'cursor-pointer' : ''} group`}
+            onClick={handleSeek}
+          >
             <div 
-              className={`w-full py-2 ${currentTrack ? 'cursor-pointer' : ''}`}
-              onClick={handleSeek}
-            >
-              <div className="h-1.5 w-full bg-gray-200 dark:bg-zinc-700 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-black dark:bg-white transition-all duration-150 ease-linear" 
-                  style={{ width: `${progress}%` }}
-                ></div>
-              </div>
-            </div>
+              className="h-full bg-black dark:bg-white transition-all duration-150 ease-linear group-hover:bg-blue-500 dark:group-hover:bg-blue-400" 
+              style={{ width: `${progress}%` }}
+            ></div>
           </div>
         </div>
-        
-        {/* Empty space for balance */}
-        <div className="hidden md:block w-1/3"></div>
 
         {/* Hidden Audio Element */}
         {currentTrack && (

@@ -44,7 +44,7 @@ const routes: RouteCard[] = [
   },
   {
     title: "Music",
-    description: "A minimalistic local music player to listen to your favorite songs.",
+    description: "A minimalistic music player to listen to your favorite songs.",
     href: "/utils/music",
     emoji: "🎵",
     status: "available",

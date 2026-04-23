@@ -6,8 +6,8 @@ import NodeID3 from 'node-id3';
 import MusicPlayer from './MusicPlayer';
 
 export const metadata: Metadata = {
-  title: 'Local Music Player | TrackMyDay',
-  description: 'Minimalistic Local Music Player',
+  title: 'Music Player',
+  description: 'Minimalistic Music Player',
 };
 
 type Track = {
