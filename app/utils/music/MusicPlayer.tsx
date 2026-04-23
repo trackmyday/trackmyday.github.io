@@ -131,12 +131,12 @@ export default function MusicPlayer({ initialAlbums }: Props) {
   };
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-zinc-900 rounded-xl overflow-hidden">
+    <div className="flex flex-col bg-white dark:bg-zinc-900 rounded-xl">
       {/* Main Content Area */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex">
         
         {/* Sidebar - Albums */}
-        <div className="w-1/3 md:w-64 border-r border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-y-auto">
+        <div className="w-1/3 md:w-64 border-r border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900">
           <div className="p-4 text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
             Albums
           </div>
@@ -165,7 +165,7 @@ export default function MusicPlayer({ initialAlbums }: Props) {
         </div>
 
         {/* Tracklist Area */}
-        <div className="flex-1 bg-gray-50/30 dark:bg-zinc-900/30 overflow-y-auto">
+        <div className="flex-1 bg-gray-50/30 dark:bg-zinc-900/30">
           {activeAlbum ? (
             <div className="p-6 pb-24">
               <h2 className="text-xl font-bold mb-6 text-gray-900 dark:text-gray-100 flex items-center gap-2">
@@ -211,7 +211,7 @@ export default function MusicPlayer({ initialAlbums }: Props) {
       </div>
 
       {/* Player Footer */}
-      <div className="absolute bottom-0 left-0 right-0 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border-t border-gray-200 dark:border-zinc-800 p-4 flex flex-col md:flex-row items-center gap-4 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)]">
+      <div className="fixed bottom-0 left-0 w-full z-50 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md border-t border-gray-200 dark:border-zinc-800 p-4 flex flex-col md:flex-row items-center gap-4 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)]">
         
         {/* Current Track Info */}
         <div className="w-full md:w-1/3 flex items-center gap-3 min-w-0">
@@ -228,25 +228,25 @@ export default function MusicPlayer({ initialAlbums }: Props) {
 
         {/* Controls */}
         <div className="w-full md:w-1/3 flex flex-col items-center gap-2">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-6">
             <button 
               onClick={handlePrev} 
               disabled={!currentTrack}
-              className="text-gray-500 hover:text-black dark:hover:text-white disabled:opacity-30 transition-colors"
+              className="text-gray-500 hover:text-black dark:hover:text-white disabled:opacity-30 transition-colors [&>svg]:w-8 [&>svg]:h-8"
             >
               <PrevIcon />
             </button>
             <button 
               onClick={togglePlay}
               disabled={!currentTrack}
-              className="w-10 h-10 rounded-full bg-black dark:bg-white text-white dark:text-black flex items-center justify-center disabled:opacity-30 hover:scale-105 transition-transform"
+              className="w-14 h-14 rounded-full bg-black dark:bg-white text-white dark:text-black flex items-center justify-center disabled:opacity-30 hover:scale-105 transition-transform [&>svg]:w-8 [&>svg]:h-8"
             >
               {isPlaying ? <PauseIcon /> : <PlayIcon />}
             </button>
             <button 
               onClick={handleNext}
               disabled={!currentTrack}
-              className="text-gray-500 hover:text-black dark:hover:text-white disabled:opacity-30 transition-colors"
+              className="text-gray-500 hover:text-black dark:hover:text-white disabled:opacity-30 transition-colors [&>svg]:w-8 [&>svg]:h-8"
             >
               <NextIcon />
             </button>

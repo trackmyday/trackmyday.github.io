@@ -67,7 +67,7 @@ export default function MusicPage() {
         <Image src="/music.png" alt="Music" width={32} height={32} className="w-8 h-8" />
         <h1 className="text-2xl font-bold tracking-tight">Music Player</h1>
       </header>
-      <main className="flex-grow flex flex-col relative bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-gray-200 dark:border-zinc-800 overflow-hidden">
+      <main className="flex-grow relative bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-gray-200 dark:border-zinc-800 pb-28 mb-28">
         <MusicPlayer initialAlbums={albums} />
       </main>
     </div>
