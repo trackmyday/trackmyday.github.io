@@ -67,20 +67,38 @@ export default function MusicPlayer({ initialAlbums }: Props) {
   const [progress, setProgress] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  const isRestoringTime = useRef(true);
+  const lastSaveTime = useRef(0);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const savedState = localStorage.getItem('musicPlayerState');
+        if (savedState) {
+          const { albumId, trackId } = JSON.parse(savedState);
+          
+          const foundAlbum = initialAlbums.find(a => a.id === albumId);
+          if (foundAlbum) {
+            setActiveAlbum(foundAlbum);
+            const foundTrack = foundAlbum.tracks.find(t => t.id === trackId);
+            if (foundTrack) {
+              setCurrentTrack(foundTrack);
+            }
+          }
+        }
+      } catch (e) {
+        console.error('Failed to parse music player state', e);
+      }
+    }
+  }, [initialAlbums]);
+
   const playTrack = (track: Track) => {
     setCurrentTrack(track);
     setIsPlaying(true);
   };
 
   const togglePlay = () => {
-    if (audioRef.current) {
-      if (isPlaying) {
-        audioRef.current.pause();
-      } else {
-        audioRef.current.play();
-      }
-      setIsPlaying(!isPlaying);
-    }
+    setIsPlaying(!isPlaying);
   };
 
   const handleNext = () => {
@@ -103,15 +121,30 @@ export default function MusicPlayer({ initialAlbums }: Props) {
 
   useEffect(() => {
     if (audioRef.current && currentTrack) {
-      audioRef.current.play().catch(e => console.error("Playback failed", e));
-      setIsPlaying(true);
+      if (isPlaying) {
+        audioRef.current.play().catch(e => console.error("Playback failed", e));
+      } else {
+        audioRef.current.pause();
+      }
     }
-  }, [currentTrack]);
+  }, [currentTrack, isPlaying]);
 
   const handleTimeUpdate = () => {
     if (audioRef.current) {
-      const p = (audioRef.current.currentTime / audioRef.current.duration) * 100;
+      const currentTime = audioRef.current.currentTime;
+      const p = (currentTime / audioRef.current.duration) * 100;
       setProgress(isNaN(p) ? 0 : p);
+
+      if (currentTrack && activeAlbum) {
+        if (Math.abs(currentTime - lastSaveTime.current) >= 1) {
+          lastSaveTime.current = currentTime;
+          localStorage.setItem('musicPlayerState', JSON.stringify({
+            albumId: activeAlbum.id,
+            trackId: currentTrack.id,
+            currentTime: currentTime
+          }));
+        }
+      }
     }
   };
 
@@ -187,9 +220,13 @@ export default function MusicPlayer({ initialAlbums }: Props) {
                       }`}
                     >
                       <div className="flex items-center gap-4">
-                        {track.coverUrl && (
+                        {track.coverUrl ? (
                           <div className="w-8 h-8 rounded overflow-hidden flex-shrink-0 relative bg-gray-100 dark:bg-zinc-800">
                             <Image src={track.coverUrl} alt="Cover" fill className="object-cover" unoptimized />
+                          </div>
+                        ) : (
+                          <div className="w-8 h-8 rounded flex-shrink-0 flex items-center justify-center bg-gray-200 dark:bg-zinc-800 text-gray-400">
+                            <MusicIcon />
                           </div>
                         )}
                         <div className="flex flex-col">
@@ -288,6 +325,22 @@ export default function MusicPlayer({ initialAlbums }: Props) {
           <audio 
             ref={audioRef}
             src={currentTrack.url}
+            onLoadedMetadata={() => {
+              if (isRestoringTime.current) {
+                isRestoringTime.current = false;
+                try {
+                  const savedState = localStorage.getItem('musicPlayerState');
+                  if (savedState) {
+                    const { currentTime } = JSON.parse(savedState);
+                    if (currentTime && isFinite(currentTime) && audioRef.current) {
+                      audioRef.current.currentTime = currentTime;
+                      const p = (currentTime / audioRef.current.duration) * 100;
+                      setProgress(isNaN(p) ? 0 : p);
+                    }
+                  }
+                } catch (e) {}
+              }
+            }}
             onTimeUpdate={handleTimeUpdate}
             onEnded={handleTrackEnded}
             onPause={() => setIsPlaying(false)}
