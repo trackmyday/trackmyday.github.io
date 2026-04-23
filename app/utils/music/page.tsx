@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import Image from 'next/image';
 import fs from 'fs';
 import path from 'path';
+import NodeID3 from 'node-id3';
 import MusicPlayer from './MusicPlayer';
 
 export const metadata: Metadata = {
@@ -13,6 +14,7 @@ type Track = {
   id: string;
   name: string;
   url: string;
+  coverUrl?: string;
 };
 
 type Album = {
@@ -39,11 +41,22 @@ function getLocalMusic(): Album[] {
       
       const tracks: Track[] = files
         .filter(file => file.isFile() && file.name.toLowerCase().endsWith('.mp3'))
-        .map((file, index) => ({
-          id: `${albumName}-${index}`,
-          name: file.name,
-          url: `/songs/${encodeURIComponent(albumName)}/${encodeURIComponent(file.name)}`
-        }));
+        .map((file, index) => {
+          const filePath = path.join(albumPath, file.name);
+          const tags = NodeID3.read(filePath);
+          let coverUrl: string | undefined;
+          
+          if (tags.image && tags.image.imageBuffer) {
+            coverUrl = `data:${tags.image.mime};base64,${tags.image.imageBuffer.toString('base64')}`;
+          }
+
+          return {
+            id: `${albumName}-${index}`,
+            name: file.name,
+            url: `/songs/${encodeURIComponent(albumName)}/${encodeURIComponent(file.name)}`,
+            coverUrl
+          };
+        });
 
       if (tracks.length > 0) {
         albums.push({
