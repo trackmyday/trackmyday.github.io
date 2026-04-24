@@ -138,8 +138,8 @@ export default function MusicPlayer({ initialAlbums }: Props) {
       playTrack(tracks[idx + 1]);
     } else if (idx === tracks.length - 1) {
       const albumIdx = initialAlbums.findIndex(a => a.id === activeAlbum.id);
-      if (albumIdx !== -1 && albumIdx < initialAlbums.length - 1) {
-        const nextAlbum = initialAlbums[albumIdx + 1];
+      if (albumIdx !== -1) {
+        const nextAlbum = initialAlbums[(albumIdx + 1) % initialAlbums.length];
         if (nextAlbum && nextAlbum.tracks.length > 0) {
           setActiveAlbum(nextAlbum);
           playTrack(nextAlbum.tracks[0]);
