@@ -69,6 +69,69 @@ export default function MusicPlayer({ initialAlbums }: Props) {
   const [durationSec, setDurationSec] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  const [stopAfterValue, setStopAfterValue] = useState<string>("");
+  const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, []);
+
+  const handleStopAfterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+    setTimeRemaining(null);
+
+    if (value) {
+      const ms = parseInt(value, 10);
+      if (!isNaN(ms)) {
+        const targetTime = Date.now() + ms;
+        setTimeRemaining(Math.ceil(ms / 1000));
+        
+        intervalRef.current = setInterval(() => {
+          const remaining = targetTime - Date.now();
+          if (remaining <= 0) {
+            if (intervalRef.current) clearInterval(intervalRef.current);
+          } else {
+            setTimeRemaining(Math.ceil(remaining / 1000));
+          }
+        }, 1000);
+
+        timerRef.current = setTimeout(() => {
+          setIsPlaying(false);
+          if (audioRef.current) {
+            audioRef.current.pause();
+          }
+          setStopAfterValue("");
+          setTimeRemaining(null);
+          if (intervalRef.current) clearInterval(intervalRef.current);
+        }, ms);
+      }
+    }
+    setStopAfterValue(value);
+  };
+
+  const formatRemainingTime = (seconds: number) => {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = Math.floor(seconds % 60);
+    if (h > 0) {
+      return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    }
+    return `${m}:${s.toString().padStart(2, '0')}`;
+  };
+
   const formatTime = (seconds: number) => {
     if (isNaN(seconds) || !isFinite(seconds)) return '0:00';
     const mins = Math.floor(seconds / 60);
@@ -246,9 +309,44 @@ export default function MusicPlayer({ initialAlbums }: Props) {
   };
 
   return (
-    <div className="flex flex-col bg-white dark:bg-zinc-900 rounded-xl">
-      {/* Main Content Area */}
-      <div className="flex-1 flex">
+    <>
+      <header className="mb-4 flex items-center justify-between w-full">
+        <div className="flex items-center gap-3">
+          <Image src="/music.png" alt="Music" width={32} height={32} className="w-8 h-8" />
+          <h1 className="text-2xl font-bold tracking-tight">Music Player</h1>
+        </div>
+        <div className={`relative flex items-center gap-2 text-xs transition-all bg-gray-100/50 dark:bg-zinc-800/50 px-3 py-1.5 rounded-full ${
+          timeRemaining !== null 
+            ? 'text-green-600 dark:text-green-400 ring-1 ring-green-500/50 opacity-100' 
+            : 'text-gray-500 dark:text-gray-400 opacity-60 hover:opacity-100'
+        }`}>
+          {timeRemaining !== null ? (
+            <>
+              <span className="font-medium whitespace-nowrap">⏱️</span>
+              <span className="font-mono font-medium">{formatRemainingTime(timeRemaining)}</span>
+            </>
+          ) : (
+            <span className="font-medium whitespace-nowrap flex items-center gap-1">⏱️ Timer</span>
+          )}
+          <select 
+            id="stopAfter"
+            value={stopAfterValue}
+            onChange={handleStopAfterChange}
+            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+          >
+            <option value="">Off</option>
+            <option value="30000">30 secs</option>
+            <option value="900000">15 mins</option>
+            <option value="1800000">30 mins</option>
+            <option value="3600000">1 hour</option>
+            <option value="7200000">2 hours</option>
+          </select>
+        </div>
+      </header>
+
+      <main className="flex-grow relative flex flex-col bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-gray-200 dark:border-zinc-800">
+        {/* Main Content Area */}
+        <div className="flex-1 flex">
         
         {/* Sidebar - Albums */}
         <div className="w-1/3 md:w-64 border-r border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900">
@@ -439,6 +537,7 @@ export default function MusicPlayer({ initialAlbums }: Props) {
           />
         )}
       </div>
-    </div>
+    </main>
+    </>
   );
 }
