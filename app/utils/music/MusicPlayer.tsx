@@ -65,7 +65,16 @@ export default function MusicPlayer({ initialAlbums }: Props) {
   
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [currentTimeSec, setCurrentTimeSec] = useState(0);
+  const [durationSec, setDurationSec] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const formatTime = (seconds: number) => {
+    if (isNaN(seconds) || !isFinite(seconds)) return '0:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
 
   const isRestoringTime = useRef(true);
   const lastSaveTime = useRef(0);
@@ -190,8 +199,11 @@ export default function MusicPlayer({ initialAlbums }: Props) {
   const handleTimeUpdate = () => {
     if (audioRef.current) {
       const currentTime = audioRef.current.currentTime;
-      const p = (currentTime / audioRef.current.duration) * 100;
+      const duration = audioRef.current.duration;
+      const p = (currentTime / duration) * 100;
       setProgress(isNaN(p) ? 0 : p);
+      setCurrentTimeSec(currentTime);
+      setDurationSec(duration);
 
       if (currentTrack && activeAlbum) {
         if (Math.abs(currentTime - lastSaveTime.current) >= 1) {
@@ -215,6 +227,7 @@ export default function MusicPlayer({ initialAlbums }: Props) {
       if (isFinite(newTime)) {
         audioRef.current.currentTime = newTime;
         setProgress(newProgress);
+        setCurrentTimeSec(newTime);
       }
     }
   };
@@ -313,9 +326,12 @@ export default function MusicPlayer({ initialAlbums }: Props) {
       <div className="fixed bottom-0 left-0 w-full z-50 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md border-t border-gray-200 dark:border-zinc-800 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)] flex flex-col">
         
         {/* Progress Bar (Full Width Bottom) */}
-        <div className="w-full px-4 md:px-8 mt-2">
+        <div className="w-full px-4 md:px-8 mt-2 flex items-center gap-3">
+          <span className="text-xs font-medium text-gray-500 dark:text-gray-400 w-10 text-right">
+            {formatTime(currentTimeSec)}
+          </span>
           <div 
-            className={`w-full h-4 bg-gray-200 dark:bg-zinc-700 rounded-full overflow-hidden ${currentTrack ? 'cursor-pointer' : ''} group`}
+            className={`flex-1 h-3 bg-gray-200 dark:bg-zinc-700 rounded-full overflow-hidden ${currentTrack ? 'cursor-pointer' : ''} group`}
             onClick={handleSeek}
           >
             <div 
@@ -323,6 +339,9 @@ export default function MusicPlayer({ initialAlbums }: Props) {
               style={{ width: `${progress}%` }}
             ></div>
           </div>
+          <span className="text-xs font-medium text-gray-500 dark:text-gray-400 w-10">
+            -{formatTime(durationSec - currentTimeSec)}
+          </span>
         </div>
         
         {/* Bottom section: Image + Controls/Info */}
@@ -384,6 +403,10 @@ export default function MusicPlayer({ initialAlbums }: Props) {
             ref={audioRef}
             src={currentTrack.url}
             onLoadedMetadata={() => {
+              if (audioRef.current) {
+                setDurationSec(audioRef.current.duration);
+                setCurrentTimeSec(audioRef.current.currentTime);
+              }
               if (isRestoringTime.current) {
                 isRestoringTime.current = false;
                 try {
@@ -394,6 +417,7 @@ export default function MusicPlayer({ initialAlbums }: Props) {
                       audioRef.current.currentTime = currentTime;
                       const p = (currentTime / audioRef.current.duration) * 100;
                       setProgress(isNaN(p) ? 0 : p);
+                      setCurrentTimeSec(currentTime);
                     }
                   }
                 } catch (e) {}
