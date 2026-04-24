@@ -136,6 +136,15 @@ export default function MusicPlayer({ initialAlbums }: Props) {
     const idx = tracks.findIndex(t => t.id === currentTrack.id);
     if (idx !== -1 && idx < tracks.length - 1) {
       playTrack(tracks[idx + 1]);
+    } else if (idx === tracks.length - 1) {
+      const albumIdx = initialAlbums.findIndex(a => a.id === activeAlbum.id);
+      if (albumIdx !== -1 && albumIdx < initialAlbums.length - 1) {
+        const nextAlbum = initialAlbums[albumIdx + 1];
+        if (nextAlbum && nextAlbum.tracks.length > 0) {
+          setActiveAlbum(nextAlbum);
+          playTrack(nextAlbum.tracks[0]);
+        }
+      }
     }
   };
 
@@ -326,7 +335,7 @@ export default function MusicPlayer({ initialAlbums }: Props) {
       <div className="fixed bottom-0 left-0 w-full z-50 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md border-t border-gray-200 dark:border-zinc-800 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)] flex flex-col">
         
         {/* Progress Bar (Full Width Bottom) */}
-        <div className="w-full px-4 md:px-8 mt-2 flex items-center gap-3">
+        <div className="w-full pl-1 pr-2 md:px-8 mt-2 flex items-center gap-3">
           <span className="text-xs font-medium text-gray-500 dark:text-gray-400 w-10 text-right">
             {formatTime(currentTimeSec)}
           </span>
