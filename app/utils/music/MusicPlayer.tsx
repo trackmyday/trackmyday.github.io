@@ -95,6 +95,26 @@ export default function MusicPlayer({ initialAlbums }: Props) {
   const playTrack = (track: Track) => {
     setCurrentTrack(track);
     setIsPlaying(true);
+    
+    // Imperatively play immediately to prevent mobile background throttling
+    if (audioRef.current) {
+      const currentSrc = audioRef.current.getAttribute('src');
+      // Update src imperatively if it changed so we can call play() synchronously
+      // without waiting for React to re-render the <audio> element.
+      if (currentSrc !== track.url && !currentSrc?.endsWith(track.url)) {
+        audioRef.current.src = track.url;
+        audioRef.current.load();
+      }
+      
+      const playPromise = audioRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(e => {
+          if (e.name !== 'AbortError') {
+            console.error("Playback failed", e);
+          }
+        });
+      }
+    }
   };
 
   const togglePlay = () => {
@@ -122,12 +142,50 @@ export default function MusicPlayer({ initialAlbums }: Props) {
   useEffect(() => {
     if (audioRef.current && currentTrack) {
       if (isPlaying) {
-        audioRef.current.play().catch(e => console.error("Playback failed", e));
+        const playPromise = audioRef.current.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(e => {
+            if (e.name !== 'AbortError') {
+              console.error("Playback failed", e);
+            }
+          });
+        }
       } else {
         audioRef.current.pause();
       }
     }
   }, [currentTrack, isPlaying]);
+
+  // Media Session API for background playback and OS lock screen controls
+  useEffect(() => {
+    if ('mediaSession' in navigator && currentTrack) {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: currentTrack.name.replace(/\.mp3$/i, ''),
+        artist: activeAlbum?.name || 'Unknown Artist',
+        album: activeAlbum?.name || 'Unknown Album',
+        artwork: currentTrack.coverUrl ? [
+          { src: currentTrack.coverUrl, sizes: '512x512', type: 'image/png' },
+          { src: currentTrack.coverUrl, sizes: '256x256', type: 'image/png' }
+        ] : []
+      });
+    }
+  }, [currentTrack, activeAlbum]);
+
+  useEffect(() => {
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.setActionHandler('play', () => {
+        setIsPlaying(true);
+        audioRef.current?.play().catch(e => console.error(e));
+      });
+      navigator.mediaSession.setActionHandler('pause', () => {
+        setIsPlaying(false);
+        audioRef.current?.pause();
+      });
+      navigator.mediaSession.setActionHandler('previoustrack', handlePrev);
+      navigator.mediaSession.setActionHandler('nexttrack', handleNext);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentTrack, activeAlbum]);
 
   const handleTimeUpdate = () => {
     if (audioRef.current) {
@@ -209,7 +267,7 @@ export default function MusicPlayer({ initialAlbums }: Props) {
               
               {activeAlbum.tracks.length > 0 ? (
                 <div className="space-y-1 max-h-[50vh] overflow-y-auto">
-                  {activeAlbum.tracks.map((track, index) => (
+                  {activeAlbum.tracks.map((track) => (
                     <div 
                       key={track.id}
                       onClick={() => playTrack(track)}
