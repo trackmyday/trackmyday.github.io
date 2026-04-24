@@ -76,11 +76,11 @@ export default function MusicPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 text-gray-900 dark:text-gray-100 p-4 md:p-8 flex flex-col">
-      <header className="mb-8 flex items-center gap-3">
+      <header className="mb-4 flex items-center gap-3">
         <Image src="/music.png" alt="Music" width={32} height={32} className="w-8 h-8" />
         <h1 className="text-2xl font-bold tracking-tight">Music Player</h1>
       </header>
-      <main className="flex-grow relative bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-gray-200 dark:border-zinc-800 pb-28 mb-28">
+      <main className="flex-grow relative bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-gray-200 dark:border-zinc-800">
         <MusicPlayer initialAlbums={albums} />
       </main>
     </div>

@@ -172,11 +172,11 @@ export default function MusicPlayer({ initialAlbums }: Props) {
         
         {/* Sidebar - Albums */}
         <div className="w-1/3 md:w-64 border-r border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900">
-          <div className="p-4 text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+          <div className="px-2 py-3 text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
             Albums
           </div>
           {initialAlbums.length === 0 && (
-            <div className="p-4 text-sm text-gray-500 text-center mt-10">
+            <div className="px-2 py-3 text-sm text-gray-500 text-center mt-10">
               No albums found in public/songs directory.
             </div>
           )}
@@ -185,7 +185,7 @@ export default function MusicPlayer({ initialAlbums }: Props) {
               <li key={album.id}>
                 <button
                   onClick={() => setActiveAlbum(album)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 text-sm text-left transition-colors ${
+                  className={`w-full flex items-center gap-3 px-2 py-3 text-sm text-left transition-colors ${
                     activeAlbum?.id === album.id 
                       ? 'bg-gray-100 dark:bg-zinc-800 text-black dark:text-white font-medium' 
                       : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800/50'
@@ -202,18 +202,18 @@ export default function MusicPlayer({ initialAlbums }: Props) {
         {/* Tracklist Area */}
         <div className="flex-1 bg-gray-50/30 dark:bg-zinc-900/30">
           {activeAlbum ? (
-            <div className="p-6 pb-4">
-              <h2 className="text-xl font-bold mb-6 text-gray-900 dark:text-gray-100 flex items-center gap-2">
+            <div className="p-2 pb-4">
+              <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100 flex items-center gap-2">
                 {activeAlbum.name}
               </h2>
               
               {activeAlbum.tracks.length > 0 ? (
-                <div className="space-y-1 max-h-[50vh] overflow-y-auto">
+                <div className="space-y-1 max-h-[60vh] overflow-y-auto">
                   {activeAlbum.tracks.map((track, index) => (
                     <div 
                       key={track.id}
                       onClick={() => playTrack(track)}
-                      className={`group flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all ${
+                      className={`group flex items-center justify-between p-1 rounded-lg cursor-pointer transition-all ${
                         currentTrack?.id === track.id 
                           ? 'bg-black text-white dark:bg-white dark:text-black shadow-md' 
                           : 'hover:bg-white dark:hover:bg-zinc-800 text-gray-700 dark:text-gray-300'
@@ -221,11 +221,11 @@ export default function MusicPlayer({ initialAlbums }: Props) {
                     >
                       <div className="flex items-center gap-4">
                         {track.coverUrl ? (
-                          <div className="w-8 h-8 rounded overflow-hidden flex-shrink-0 relative bg-gray-100 dark:bg-zinc-800">
+                          <div className="w-10 h-10 rounded overflow-hidden flex-shrink-0 relative bg-gray-100 dark:bg-zinc-800">
                             <Image src={track.coverUrl} alt="Cover" fill className="object-cover" unoptimized />
                           </div>
                         ) : (
-                          <div className="w-8 h-8 rounded flex-shrink-0 flex items-center justify-center bg-gray-200 dark:bg-zinc-800 text-gray-400">
+                          <div className="w-10 h-10 rounded flex-shrink-0 flex items-center justify-center bg-gray-200 dark:bg-zinc-800 text-gray-400">
                             <MusicIcon />
                           </div>
                         )}
@@ -233,9 +233,9 @@ export default function MusicPlayer({ initialAlbums }: Props) {
                           <span className="text-sm font-medium truncate max-w-md text-wrap">{track.name.replace(/\.mp3$/i, '')}</span>
                         </div>
                       </div>
-                      <div className={`opacity-0 group-hover:opacity-100 transition-opacity ${currentTrack?.id === track.id ? 'opacity-100' : ''}`}>
+                      {/* <div className={`opacity-0 group-hover:opacity-100 transition-opacity ${currentTrack?.id === track.id ? 'opacity-100' : ''}`}>
                         <MusicIcon />
-                      </div>
+                      </div> */}
                     </div>
                   ))}
                 </div>
@@ -254,8 +254,21 @@ export default function MusicPlayer({ initialAlbums }: Props) {
       {/* Player Footer */}
       <div className="fixed bottom-0 left-0 w-full z-50 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md border-t border-gray-200 dark:border-zinc-800 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)] flex flex-col">
         
-        {/* Top section: Image + Controls/Info */}
-        <div className="flex p-4 gap-6 items-center">
+        {/* Progress Bar (Full Width Bottom) */}
+        <div className="w-full px-4 md:px-8 mt-2">
+          <div 
+            className={`w-full h-4 bg-gray-200 dark:bg-zinc-700 rounded-full overflow-hidden ${currentTrack ? 'cursor-pointer' : ''} group`}
+            onClick={handleSeek}
+          >
+            <div 
+              className="h-full bg-red-600 dark:bg-red-600 transition-all duration-150 ease-linear group-hover:bg-blue-500 dark:group-hover:bg-blue-400" 
+              style={{ width: `${progress}%` }}
+            ></div>
+          </div>
+        </div>
+        
+        {/* Bottom section: Image + Controls/Info */}
+        <div className="flex p-4 mb-4 gap-6 items-center">
           
           {/* Album Image */}
           <div className="w-28 h-28 md:w-28 md:h-28 flex-shrink-0 bg-gray-100 dark:bg-zinc-800 rounded-lg relative overflow-hidden flex items-center justify-center text-gray-400 shadow-sm">
@@ -274,7 +287,7 @@ export default function MusicPlayer({ initialAlbums }: Props) {
               <h4 className="text-lg font-bold truncate text-gray-900 dark:text-gray-100">
                 {currentTrack ? currentTrack.name.replace(/\.mp3$/i, '') : 'No track selected'}
               </h4>
-              <p className="text-sm text-gray-500 truncate">{activeAlbum?.name || '---'}</p>
+              {/* <p className="text-sm text-gray-500 truncate">{activeAlbum?.name || '---'}</p> */}
             </div>
 
             {/* Playback Controls */}
@@ -304,19 +317,6 @@ export default function MusicPlayer({ initialAlbums }: Props) {
             
             {/* Empty space for balance */}
             <div className="hidden md:block w-1/3"></div>
-          </div>
-        </div>
-
-        {/* Progress Bar (Full Width Bottom) */}
-        <div className="w-full px-4 md:px-8 mb-12 mt-2">
-          <div 
-            className={`w-full h-1.5 bg-gray-200 dark:bg-zinc-700 rounded-full overflow-hidden ${currentTrack ? 'cursor-pointer' : ''} group`}
-            onClick={handleSeek}
-          >
-            <div 
-              className="h-full bg-black dark:bg-white transition-all duration-150 ease-linear group-hover:bg-blue-500 dark:group-hover:bg-blue-400" 
-              style={{ width: `${progress}%` }}
-            ></div>
           </div>
         </div>
 
