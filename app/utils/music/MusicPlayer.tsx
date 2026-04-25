@@ -466,19 +466,18 @@ export default function MusicPlayer({ initialAlbums }: Props) {
               No albums found in public/songs directory.
             </div>
           )}
-          <ul className="pb-20">
+          <ul className="pb-20 px-2 space-y-1">
             {initialAlbums.map((album) => (
               <li key={album.id}>
                 <button
                   onClick={() => setActiveAlbum(album)}
-                  className={`w-full flex items-center gap-3 px-2 py-3 text-sm text-left transition-colors ${
+                  className={`w-full block px-3 py-3 text-sm text-left rounded-lg transition-all ${
                     activeAlbum?.id === album.id 
-                      ? 'bg-gray-100 dark:bg-zinc-800 text-black dark:text-white font-medium' 
-                      : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800/50'
+                      ? 'bg-blue-200 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 font-bold ring-1 ring-blue-500/30 shadow-sm' 
+                      : 'text-gray-700 dark:text-gray-300 font-semibold hover:bg-gray-100 dark:hover:bg-zinc-800/80 hover:text-black dark:hover:text-white'
                   }`}
                 >
-                  <FolderIcon />
-                  <span className="truncate">{album.name}</span>
+                  <span className="truncate block">{album.name}</span>
                 </button>
               </li>
             ))}
