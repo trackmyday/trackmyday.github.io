@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Providers } from "./providers";
 import { LayoutChrome } from "./components/LayoutChrome";
+import ServiceWorkerRegister from "./components/ServiceWorkerRegister";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -17,6 +18,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Track My Day | Your Personal Productivity Hub",
   description: "Track your habits, goals, and daily activities with our comprehensive tracking tools",
+  manifest: "/api/manifest?app=home",
 };
 
 export default function RootLayout({
@@ -30,6 +32,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200`}
       >
         <Providers>
+          <ServiceWorkerRegister />
           <LayoutChrome>{children}</LayoutChrome>
         </Providers>
       </body>

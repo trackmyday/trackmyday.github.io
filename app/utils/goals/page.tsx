@@ -4,6 +4,7 @@ import HabitTracker from "./HabitTracker";
 export const metadata: Metadata = {
   title: "Goals | Track My Day",
   description: "Daily Goals Tracker",
+  manifest: "/api/manifest?app=goals",
 };
 
 export default function Goals() {

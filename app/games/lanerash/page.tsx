@@ -1,5 +1,12 @@
 import React from 'react';
+import type { Metadata } from 'next';
 import LaneRashGame from './LaneRashGame';
+
+export const metadata: Metadata = {
+  title: "Lane Rash | Track My Day",
+  description: "Play Lane Rash",
+  manifest: "/api/manifest?app=lanerash",
+};
 
 const LaneRashGamePage = () => {
   return (

@@ -527,7 +527,9 @@ export default function MusicPlayer({ initialAlbums }: Props) {
                       setCurrentTimeSec(currentTime);
                     }
                   }
-                } catch (e) {}
+                } catch {
+                  // Ignore
+                }
               }
             }}
             onTimeUpdate={handleTimeUpdate}

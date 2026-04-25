@@ -1,5 +1,4 @@
 import { Metadata } from 'next';
-import Image from 'next/image';
 import fs from 'fs';
 import path from 'path';
 import NodeID3 from 'node-id3';
@@ -8,6 +7,7 @@ import MusicPlayer from './MusicPlayer';
 export const metadata: Metadata = {
   title: 'Music Player',
   description: 'Minimalistic Music Player',
+  manifest: "/api/manifest?app=music",
 };
 
 type Track = {
