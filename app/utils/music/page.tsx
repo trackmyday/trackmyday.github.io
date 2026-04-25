@@ -7,7 +7,7 @@ import MusicPlayer from './MusicPlayer';
 export const metadata: Metadata = {
   title: 'Music Player',
   description: 'Minimalistic Music Player',
-  manifest: "/api/manifest?app=music",
+  manifest: "/manifests/music.webmanifest",
 };
 
 type Track = {

@@ -18,7 +18,8 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Track My Day | Your Personal Productivity Hub",
   description: "Track your habits, goals, and daily activities with our comprehensive tracking tools",
-  manifest: "/api/manifest?app=home",
+  manifest: "/manifests/home.webmanifest",
+  applicationName: "Track My Day",
 };
 
 export default function RootLayout({

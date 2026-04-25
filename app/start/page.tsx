@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Start | Track My Day",
   description: "Start",
-  manifest: "/api/manifest?app=home",
+  manifest: "/manifests/start.webmanifest",
 };
 
 export default function Start() {
