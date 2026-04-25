@@ -69,11 +69,26 @@ export default function MusicPlayer({ initialAlbums }: Props) {
   const [currentTimeSec, setCurrentTimeSec] = useState(0);
   const [durationSec, setDurationSec] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const activeAlbumRef = useRef<Album | null>(activeAlbum);
+  const currentTrackRef = useRef<Track | null>(currentTrack);
+  const isPlayingRef = useRef(isPlaying);
 
   const [stopAfterValue, setStopAfterValue] = useState<string>("");
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    activeAlbumRef.current = activeAlbum;
+  }, [activeAlbum]);
+
+  useEffect(() => {
+    currentTrackRef.current = currentTrack;
+  }, [currentTrack]);
+
+  useEffect(() => {
+    isPlayingRef.current = isPlaying;
+  }, [isPlaying]);
 
   useEffect(() => {
     return () => {
@@ -174,10 +189,7 @@ export default function MusicPlayer({ initialAlbums }: Props) {
     }
   }, [initialAlbums]);
 
-  const playTrack = (track: Track) => {
-    setCurrentTrack(track);
-    setIsPlaying(true);
-    
+  const updatePlayCount = (track: Track) => {
     setPlayCounts(prev => {
       const newCounts = { ...prev, [track.id]: (prev[track.id] || 0) + 1 };
       if (typeof window !== 'undefined') {
@@ -185,18 +197,46 @@ export default function MusicPlayer({ initialAlbums }: Props) {
       }
       return newCounts;
     });
+  };
 
-    // Imperatively play immediately to prevent mobile background throttling
-    if (audioRef.current) {
-      const currentSrc = audioRef.current.getAttribute('src');
-      // Update src imperatively if it changed so we can call play() synchronously
-      // without waiting for React to re-render the <audio> element.
-      if (currentSrc !== track.url && !currentSrc?.endsWith(track.url)) {
-        audioRef.current.src = track.url;
-        audioRef.current.load();
+  const getSortedTracks = (album: Album) => {
+    return [...album.tracks].sort((a, b) => {
+      const playCountDiff = (playCounts[b.id] || 0) - (playCounts[a.id] || 0);
+      if (playCountDiff !== 0) {
+        return playCountDiff;
       }
-      
-      const playPromise = audioRef.current.play();
+
+      return a.name.localeCompare(b.name);
+    });
+  };
+
+  const startTrackPlayback = (track: Track, album: Album | null, shouldCountPlay = true) => {
+    const audio = audioRef.current;
+
+    if (album) {
+      activeAlbumRef.current = album;
+      setActiveAlbum(album);
+    }
+
+    currentTrackRef.current = track;
+    setCurrentTrack(track);
+    isPlayingRef.current = true;
+    setIsPlaying(true);
+
+    if (shouldCountPlay) {
+      updatePlayCount(track);
+    }
+
+    if (audio) {
+      const currentSrc = audio.currentSrc || audio.src;
+      const nextSrc = new URL(track.url, window.location.href).href;
+
+      if (currentSrc !== nextSrc) {
+        audio.src = track.url;
+        audio.load();
+      }
+
+      const playPromise = audio.play();
       if (playPromise !== undefined) {
         playPromise.catch(e => {
           if (e.name !== 'AbortError') {
@@ -207,51 +247,101 @@ export default function MusicPlayer({ initialAlbums }: Props) {
     }
   };
 
+  const getAdjacentTrack = (direction: 'next' | 'prev') => {
+    const album = activeAlbumRef.current;
+    const track = currentTrackRef.current;
+    if (!album || !track) return null;
+
+    const tracks = getSortedTracks(album);
+    const idx = tracks.findIndex(t => t.id === track.id);
+    if (idx === -1) return null;
+
+    if (direction === 'prev') {
+      if (idx > 0) {
+        return { album, track: tracks[idx - 1] };
+      }
+      return null;
+    }
+
+    if (idx < tracks.length - 1) {
+      return { album, track: tracks[idx + 1] };
+    }
+
+    const albumIdx = initialAlbums.findIndex(a => a.id === album.id);
+    if (albumIdx === -1 || initialAlbums.length === 0) {
+      return null;
+    }
+
+    const nextAlbum = initialAlbums[(albumIdx + 1) % initialAlbums.length];
+    if (!nextAlbum?.tracks.length) {
+      return null;
+    }
+
+    const nextAlbumTracks = getSortedTracks(nextAlbum);
+    return { album: nextAlbum, track: nextAlbumTracks[0] };
+  };
+
   const togglePlay = () => {
-    setIsPlaying(!isPlaying);
+    const audio = audioRef.current;
+    if (!audio || !currentTrackRef.current) return;
+
+    if (audio.paused) {
+      isPlayingRef.current = true;
+      setIsPlaying(true);
+      audio.play().catch(e => console.error(e));
+      return;
+    }
+
+    isPlayingRef.current = false;
+    setIsPlaying(false);
+    audio.pause();
   };
 
   const handleNext = () => {
-    if (!currentTrack || !activeAlbum) return;
-    const tracks = activeAlbum.tracks;
-    const idx = tracks.findIndex(t => t.id === currentTrack.id);
-    if (idx !== -1 && idx < tracks.length - 1) {
-      playTrack(tracks[idx + 1]);
-    } else if (idx === tracks.length - 1) {
-      const albumIdx = initialAlbums.findIndex(a => a.id === activeAlbum.id);
-      if (albumIdx !== -1) {
-        const nextAlbum = initialAlbums[(albumIdx + 1) % initialAlbums.length];
-        if (nextAlbum && nextAlbum.tracks.length > 0) {
-          setActiveAlbum(nextAlbum);
-          playTrack(nextAlbum.tracks[0]);
-        }
-      }
+    const nextTrack = getAdjacentTrack('next');
+    if (nextTrack) {
+      startTrackPlayback(nextTrack.track, nextTrack.album);
     }
   };
 
   const handlePrev = () => {
-    if (!currentTrack || !activeAlbum) return;
-    const tracks = activeAlbum.tracks;
-    const idx = tracks.findIndex(t => t.id === currentTrack.id);
-    if (idx > 0) {
-      playTrack(tracks[idx - 1]);
+    const previousTrack = getAdjacentTrack('prev');
+    if (previousTrack) {
+      startTrackPlayback(previousTrack.track, previousTrack.album);
     }
   };
 
   useEffect(() => {
-    if (audioRef.current && currentTrack) {
-      if (isPlaying) {
-        const playPromise = audioRef.current.play();
-        if (playPromise !== undefined) {
-          playPromise.catch(e => {
-            if (e.name !== 'AbortError') {
-              console.error("Playback failed", e);
-            }
-          });
-        }
-      } else {
-        audioRef.current.pause();
+    const audio = audioRef.current;
+    if (!audio || !currentTrack) {
+      return;
+    }
+
+    const currentSrc = audio.currentSrc || audio.src;
+    const expectedSrc = new URL(currentTrack.url, window.location.href).href;
+    if (currentSrc !== expectedSrc) {
+      audio.src = currentTrack.url;
+      audio.load();
+    }
+  }, [currentTrack]);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio || !currentTrack) {
+      return;
+    }
+
+    if (isPlaying) {
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(e => {
+          if (e.name !== 'AbortError') {
+            console.error("Playback failed", e);
+          }
+        });
       }
+    } else {
+      audio.pause();
     }
   }, [currentTrack, isPlaying]);
 
@@ -272,19 +362,23 @@ export default function MusicPlayer({ initialAlbums }: Props) {
 
   useEffect(() => {
     if ('mediaSession' in navigator) {
+      navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
       navigator.mediaSession.setActionHandler('play', () => {
+        if (!currentTrackRef.current) return;
         setIsPlaying(true);
+        isPlayingRef.current = true;
         audioRef.current?.play().catch(e => console.error(e));
       });
       navigator.mediaSession.setActionHandler('pause', () => {
         setIsPlaying(false);
+        isPlayingRef.current = false;
         audioRef.current?.pause();
       });
       navigator.mediaSession.setActionHandler('previoustrack', handlePrev);
       navigator.mediaSession.setActionHandler('nexttrack', handleNext);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentTrack, activeAlbum]);
+  }, [currentTrack, activeAlbum, isPlaying]);
 
   const handleTimeUpdate = () => {
     if (audioRef.current) {
@@ -320,10 +414,6 @@ export default function MusicPlayer({ initialAlbums }: Props) {
         setCurrentTimeSec(newTime);
       }
     }
-  };
-
-  const handleTrackEnded = () => {
-    handleNext();
   };
 
   return (
@@ -405,10 +495,10 @@ export default function MusicPlayer({ initialAlbums }: Props) {
               
               {activeAlbum.tracks.length > 0 ? (
                 <div className="space-y-2 max-h-[60vh] overflow-y-auto px-1 py-1">
-                  {[...activeAlbum.tracks].sort((a, b) => (playCounts[b.id] || 0) - (playCounts[a.id] || 0)).map((track) => (
+                  {getSortedTracks(activeAlbum).map((track) => (
                     <div 
                       key={track.id}
-                      onClick={() => playTrack(track)}
+                      onClick={() => startTrackPlayback(track, activeAlbum)}
                       className={`relative group flex items-center justify-between p-2 rounded-lg cursor-pointer transition-all ${
                         currentTrack?.id === track.id 
                           ? 'bg-black text-white dark:bg-white dark:text-black shadow-md' 
@@ -525,39 +615,52 @@ export default function MusicPlayer({ initialAlbums }: Props) {
         </div>
 
         {/* Hidden Audio Element */}
-        {currentTrack && (
-          <audio 
-            ref={audioRef}
-            src={currentTrack.url}
-            onLoadedMetadata={() => {
-              if (audioRef.current) {
-                setDurationSec(audioRef.current.duration);
-                setCurrentTimeSec(audioRef.current.currentTime);
-              }
-              if (isRestoringTime.current) {
-                isRestoringTime.current = false;
-                try {
-                  const savedState = localStorage.getItem('musicPlayerState');
-                  if (savedState) {
-                    const { currentTime } = JSON.parse(savedState);
-                    if (currentTime && isFinite(currentTime) && audioRef.current) {
-                      audioRef.current.currentTime = currentTime;
-                      const p = (currentTime / audioRef.current.duration) * 100;
-                      setProgress(isNaN(p) ? 0 : p);
-                      setCurrentTimeSec(currentTime);
-                    }
+        <audio 
+          ref={audioRef}
+          preload="auto"
+          onLoadedMetadata={() => {
+            if (audioRef.current) {
+              setDurationSec(audioRef.current.duration);
+              setCurrentTimeSec(audioRef.current.currentTime);
+            }
+            if (isRestoringTime.current) {
+              isRestoringTime.current = false;
+              try {
+                const savedState = localStorage.getItem('musicPlayerState');
+                if (savedState) {
+                  const { currentTime } = JSON.parse(savedState);
+                  if (currentTime && isFinite(currentTime) && audioRef.current) {
+                    audioRef.current.currentTime = currentTime;
+                    const p = (currentTime / audioRef.current.duration) * 100;
+                    setProgress(isNaN(p) ? 0 : p);
+                    setCurrentTimeSec(currentTime);
                   }
-                } catch {
-                  // Ignore
                 }
+              } catch {
+                // Ignore
               }
-            }}
-            onTimeUpdate={handleTimeUpdate}
-            onEnded={handleTrackEnded}
-            onPause={() => setIsPlaying(false)}
-            onPlay={() => setIsPlaying(true)}
-          />
-        )}
+            }
+          }}
+          onTimeUpdate={handleTimeUpdate}
+          onEnded={() => {
+            const nextTrack = getAdjacentTrack('next');
+            if (nextTrack) {
+              startTrackPlayback(nextTrack.track, nextTrack.album);
+              return;
+            }
+
+            isPlayingRef.current = false;
+            setIsPlaying(false);
+          }}
+          onPause={() => {
+            isPlayingRef.current = false;
+            setIsPlaying(false);
+          }}
+          onPlay={() => {
+            isPlayingRef.current = true;
+            setIsPlaying(true);
+          }}
+        />
       </div>
     </main>
     </>
