@@ -62,6 +62,7 @@ type Props = {
 export default function MusicPlayer({ initialAlbums }: Props) {
   const [activeAlbum, setActiveAlbum] = useState<Album | null>(initialAlbums.length > 0 ? initialAlbums[0] : null);
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
+  const [playCounts, setPlayCounts] = useState<Record<string, number>>({});
   
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -161,6 +162,15 @@ export default function MusicPlayer({ initialAlbums }: Props) {
       } catch (e) {
         console.error('Failed to parse music player state', e);
       }
+
+      try {
+        const counts = localStorage.getItem('musicPlayerCounts');
+        if (counts) {
+          setPlayCounts(JSON.parse(counts));
+        }
+      } catch (e) {
+        console.error('Failed to parse play counts', e);
+      }
     }
   }, [initialAlbums]);
 
@@ -168,6 +178,14 @@ export default function MusicPlayer({ initialAlbums }: Props) {
     setCurrentTrack(track);
     setIsPlaying(true);
     
+    setPlayCounts(prev => {
+      const newCounts = { ...prev, [track.id]: (prev[track.id] || 0) + 1 };
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('musicPlayerCounts', JSON.stringify(newCounts));
+      }
+      return newCounts;
+    });
+
     // Imperatively play immediately to prevent mobile background throttling
     if (audioRef.current) {
       const currentSrc = audioRef.current.getAttribute('src');
@@ -386,12 +404,12 @@ export default function MusicPlayer({ initialAlbums }: Props) {
               </h2>
               
               {activeAlbum.tracks.length > 0 ? (
-                <div className="space-y-1 max-h-[60vh] overflow-y-auto">
-                  {activeAlbum.tracks.map((track) => (
+                <div className="space-y-2 max-h-[60vh] overflow-y-auto px-1 py-1">
+                  {[...activeAlbum.tracks].sort((a, b) => (playCounts[b.id] || 0) - (playCounts[a.id] || 0)).map((track) => (
                     <div 
                       key={track.id}
                       onClick={() => playTrack(track)}
-                      className={`group flex items-center justify-between p-1 rounded-lg cursor-pointer transition-all ${
+                      className={`relative group flex items-center justify-between p-2 rounded-lg cursor-pointer transition-all ${
                         currentTrack?.id === track.id 
                           ? 'bg-black text-white dark:bg-white dark:text-black shadow-md' 
                           : 'hover:bg-white dark:hover:bg-zinc-800 text-gray-700 dark:text-gray-300'
@@ -411,9 +429,11 @@ export default function MusicPlayer({ initialAlbums }: Props) {
                           <span className="text-sm font-medium truncate max-w-md text-wrap">{track.name.replace(/\.mp3$/i, '')}</span>
                         </div>
                       </div>
-                      {/* <div className={`opacity-0 group-hover:opacity-100 transition-opacity ${currentTrack?.id === track.id ? 'opacity-100' : ''}`}>
-                        <MusicIcon />
-                      </div> */}
+                      {playCounts[track.id] ? (
+                        <span className="absolute top-1 right-1 grid min-h-[24px] min-w-[24px] place-items-center rounded-full bg-red-600 py-1 px-1 text-xs text-white">
+                          {playCounts[track.id]}
+                        </span>
+                      ) : null}
                     </div>
                   ))}
                 </div>
