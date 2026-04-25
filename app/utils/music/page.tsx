@@ -49,8 +49,13 @@ function getLocalMusic(): Album[] {
           if (tags.image && typeof tags.image !== 'string' && tags.image.imageBuffer) {
             coverUrl = `data:${tags.image.mime};base64,${tags.image.imageBuffer.toString('base64')}`;
           } else {
+            const songNameWithoutExt = file.name.replace(/\.mp3$/i, '');
+            const songImagePath = path.join(albumPath, `${songNameWithoutExt}.jpeg`);
             const thumbnailPath = path.join(albumPath, 'thumbnail.jpeg');
-            if (fs.existsSync(thumbnailPath)) {
+            
+            if (fs.existsSync(songImagePath)) {
+              coverUrl = `/songs/${encodeURIComponent(albumName)}/${encodeURIComponent(`${songNameWithoutExt}.jpeg`)}`;
+            } else if (fs.existsSync(thumbnailPath)) {
               coverUrl = `/songs/${encodeURIComponent(albumName)}/thumbnail.jpeg`;
             }
           }

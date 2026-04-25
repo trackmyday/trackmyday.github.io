@@ -386,7 +386,7 @@ export default function MusicPlayer({ initialAlbums }: Props) {
               </h2>
               
               {activeAlbum.tracks.length > 0 ? (
-                <div className="space-y-1 max-h-[50vh] overflow-y-auto">
+                <div className="space-y-1 max-h-[60vh] overflow-y-auto">
                   {activeAlbum.tracks.map((track) => (
                     <div 
                       key={track.id}
