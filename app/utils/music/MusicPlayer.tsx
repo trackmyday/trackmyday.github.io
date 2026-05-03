@@ -84,6 +84,70 @@ export default function MusicPlayer({ initialAlbums }: Props) {
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const wakeLockRef = useRef<WakeLockSentinel | null>(null);
+  const [isWakeLockActive, setIsWakeLockActive] = useState(false);
+
+  useEffect(() => {
+    const requestWakeLock = async () => {
+      try {
+        if ('wakeLock' in navigator && isPlaying) {
+          wakeLockRef.current = await navigator.wakeLock.request('screen');
+          setIsWakeLockActive(true);
+          
+          wakeLockRef.current.addEventListener('release', () => {
+            setIsWakeLockActive(false);
+          });
+        }
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          console.error(`Screen Wake Lock error: ${err.name}, ${err.message}`);
+        }
+        setIsWakeLockActive(false);
+      }
+    };
+
+    const releaseWakeLock = async () => {
+      if (wakeLockRef.current !== null) {
+        await wakeLockRef.current.release();
+        wakeLockRef.current = null;
+        setIsWakeLockActive(false);
+      }
+    };
+
+    if (isPlaying) {
+      requestWakeLock();
+    } else {
+      releaseWakeLock();
+    }
+
+    return () => {
+      releaseWakeLock();
+    };
+  }, [isPlaying]);
+
+  useEffect(() => {
+    const handleVisibilityChange = async () => {
+      if (wakeLockRef.current !== null && document.visibilityState === 'visible' && isPlaying) {
+        try {
+          wakeLockRef.current = await navigator.wakeLock.request('screen');
+          setIsWakeLockActive(true);
+          wakeLockRef.current.addEventListener('release', () => {
+            setIsWakeLockActive(false);
+          });
+        } catch (err: unknown) {
+          if (err instanceof Error) {
+            console.error(`Screen Wake Lock error on visibility change: ${err.name}, ${err.message}`);
+          }
+          setIsWakeLockActive(false);
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [isPlaying]);
 
   useEffect(() => {
     activeAlbumRef.current = activeAlbum;
@@ -421,7 +485,15 @@ export default function MusicPlayer({ initialAlbums }: Props) {
       <header className="mb-4 flex items-center justify-between w-full">
         <div className="flex items-center gap-3">
           <Image src="/music.png" alt="Music" width={32} height={32} className="w-8 h-8" />
-          <h1 className="text-2xl font-bold tracking-tight">Music Player</h1>
+          <div className="flex items-start gap-1.5 pt-1">
+            <h1 className="text-2xl font-bold tracking-tight leading-none">Music Player</h1>
+            <div 
+              title={isWakeLockActive ? "Screen wake lock active" : "Screen wake lock inactive"}
+              className={`w-2 h-2 rounded-full transition-colors flex-shrink-0 ${
+                isWakeLockActive ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]' : 'bg-gray-300 dark:bg-gray-600'
+              }`} 
+            />
+          </div>
         </div>
         <div className={`relative flex items-center gap-2 text-xs transition-all bg-gray-100/50 dark:bg-zinc-800/50 px-3 py-1.5 rounded-full ${
           timeRemaining !== null 
