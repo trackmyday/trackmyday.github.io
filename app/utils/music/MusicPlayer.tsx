@@ -200,14 +200,7 @@ export default function MusicPlayer({ initialAlbums }: Props) {
   };
 
   const getSortedTracks = (album: Album) => {
-    return [...album.tracks].sort((a, b) => {
-      const playCountDiff = (playCounts[b.id] || 0) - (playCounts[a.id] || 0);
-      if (playCountDiff !== 0) {
-        return playCountDiff;
-      }
-
-      return a.name.localeCompare(b.name);
-    });
+    return album.tracks;
   };
 
   const startTrackPlayback = (track: Track, album: Album | null, shouldCountPlay = true) => {
