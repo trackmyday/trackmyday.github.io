@@ -275,6 +275,7 @@ export default function MusicPlayer({ initialAlbums }: Props) {
   };
 
   const startTrackPlayback = (track: Track, album: Album | null, shouldCountPlay = true) => {
+    const isSameTrack = currentTrackRef.current?.id === track.id;
     const audio = audioRef.current;
 
     if (album) {
@@ -287,7 +288,7 @@ export default function MusicPlayer({ initialAlbums }: Props) {
     isPlayingRef.current = true;
     setIsPlaying(true);
 
-    if (shouldCountPlay) {
+    if (shouldCountPlay && !isSameTrack) {
       updatePlayCount(track);
     }
 
