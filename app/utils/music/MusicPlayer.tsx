@@ -34,6 +34,13 @@ const FolderIcon = () => (
   </svg>
 );
 
+const RefreshIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+    <path d="M3 3v5h5"></path>
+  </svg>
+);
+
 const MusicIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M9 18V5l12-2v13"></path>
@@ -450,8 +457,8 @@ export default function MusicPlayer({ initialAlbums }: Props) {
         <div className="flex-1 flex">
         
         {/* Sidebar - Albums */}
-        <div className="w-1/3 md:w-64 border-r border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900">
-          <div className="px-2 py-3 text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+        <div className="w-1/3 md:w-64 border-r border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex flex-col">
+          <div className="px-2 py-3 text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider flex-shrink-0">
             Albums
           </div>
           {initialAlbums.length === 0 && (
@@ -459,7 +466,7 @@ export default function MusicPlayer({ initialAlbums }: Props) {
               No albums found in public/songs directory.
             </div>
           )}
-          <ul className="pb-20 px-2 space-y-1">
+          <ul className="pb-4 px-2 space-y-1 flex-1 overflow-y-auto">
             {initialAlbums.map((album) => (
               <li key={album.id}>
                 <button
@@ -475,6 +482,19 @@ export default function MusicPlayer({ initialAlbums }: Props) {
               </li>
             ))}
           </ul>
+          <div className="p-2 pb-50 flex justify-center flex-shrink-0 mt-auto">
+            <button
+              onClick={() => {
+                localStorage.removeItem('musicPlayerState');
+                localStorage.removeItem('musicPlayerCounts');
+                window.location.reload();
+              }}
+              title="Reset Player State"
+              className="p-2 text-gray-300 dark:text-gray-700 hover:text-gray-600 dark:hover:text-gray-400 transition-colors rounded-full hover:bg-gray-100 dark:hover:bg-zinc-800"
+            >
+              <RefreshIcon />
+            </button>
+          </div>
         </div>
 
         {/* Tracklist Area */}
