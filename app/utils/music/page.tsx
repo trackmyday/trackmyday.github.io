@@ -141,7 +141,7 @@ export default function MusicPage() {
   const albums = getMusic();
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 text-gray-900 dark:text-gray-100 p-4 md:p-8 flex flex-col">
+    <div className="min-h-screen bg-transparent text-gray-900 dark:text-gray-100 p-4 md:p-8 flex flex-col">
       <MusicPlayer initialAlbums={albums} />
     </div>
   );

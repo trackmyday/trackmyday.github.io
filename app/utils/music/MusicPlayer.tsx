@@ -483,7 +483,20 @@ export default function MusicPlayer({ initialAlbums }: Props) {
 
   return (
     <>
-      <header className="mb-4 flex items-center justify-between w-full">
+      {/* Blurred Background */}
+      {currentTrack?.coverUrl && (
+        <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none transition-opacity duration-1000 ease-in-out">
+          <Image 
+            src={currentTrack.coverUrl} 
+            alt="Background" 
+            fill 
+            className="object-cover blur-[30px] opacity-70 dark:opacity-40 scale-110" 
+            unoptimized 
+          />
+        </div>
+      )}
+
+      <header className="mb-4 flex items-center justify-between w-full relative z-10">
         <div className="flex items-center gap-3">
           <Image src="/music.png" alt="Music" width={32} height={32} className="w-8 h-8" />
           <div className="flex items-start gap-1.5 pt-1">
@@ -525,12 +538,12 @@ export default function MusicPlayer({ initialAlbums }: Props) {
         </div>
       </header>
 
-      <main className="flex-grow relative flex flex-col bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-gray-200 dark:border-zinc-800">
+      <main className="flex-grow relative z-10 flex flex-col bg-white/30 dark:bg-zinc-900/40 backdrop-blur-xl rounded-xl shadow-lg border border-white/20 dark:border-zinc-800/50 overflow-hidden">
         {/* Main Content Area */}
         <div className="flex-1 flex">
         
         {/* Sidebar - Albums */}
-        <div className="w-1/3 md:w-64 border-r border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex flex-col">
+        <div className="w-1/3 md:w-64 border-r border-white/20 dark:border-zinc-800/50 bg-white/20 dark:bg-zinc-900/20 flex flex-col">
           <div className="px-2 py-3 text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider flex-shrink-0">
             Albums
           </div>
@@ -571,7 +584,7 @@ export default function MusicPlayer({ initialAlbums }: Props) {
         </div>
 
         {/* Tracklist Area */}
-        <div className="flex-1 bg-gray-50/30 dark:bg-zinc-900/30">
+        <div className="flex-1 bg-transparent">
           {activeAlbum ? (
             <div className="p-2 pb-4">
               <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100 flex items-center gap-2">
@@ -586,8 +599,8 @@ export default function MusicPlayer({ initialAlbums }: Props) {
                       onClick={() => startTrackPlayback(track, activeAlbum)}
                       className={`relative group flex items-center justify-between p-2 rounded-lg cursor-pointer transition-all ${
                         currentTrack?.id === track.id 
-                          ? 'bg-black text-white dark:bg-white dark:text-black shadow-md' 
-                          : 'hover:bg-white dark:hover:bg-zinc-800 text-gray-700 dark:text-gray-300'
+                          ? 'bg-black/80 text-white dark:bg-white/80 dark:text-black shadow-md backdrop-blur-sm' 
+                          : 'hover:bg-white/50 dark:hover:bg-zinc-800/50 text-gray-800 dark:text-gray-200'
                       }`}
                     >
                       <div className="flex items-center gap-4">
@@ -625,7 +638,7 @@ export default function MusicPlayer({ initialAlbums }: Props) {
       </div>
 
       {/* Player Footer */}
-      <div className="fixed bottom-0 left-0 w-full z-50 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md border-t border-gray-200 dark:border-zinc-800 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)] flex flex-col">
+      <div className="fixed bottom-0 left-0 w-full z-50 bg-white/50 dark:bg-zinc-900/60 backdrop-blur-xl border-t border-white/20 dark:border-zinc-800/50 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)] flex flex-col">
         
         {/* Progress Bar (Full Width Bottom) */}
         <div className="w-full pl-1 pr-2 md:px-8 mt-2 flex items-center gap-3">
